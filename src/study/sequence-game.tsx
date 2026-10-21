@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { Sequence } from '@/content/study/types';
 import { shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
+import { Stars } from '@/study/celebration';
 
 type Item = { label: string; detail: string; position: number };
 
@@ -19,6 +20,7 @@ type SequenceGameProps = { sequence: Sequence; recordKey: string };
 
 function SequenceBoard({ sequence, recordKey }: SequenceGameProps) {
   const record = useStudyStore((state) => state.answer);
+  const complete = useStudyStore((state) => state.complete);
   const [order, setOrder] = useState(() => scramble(sequence));
   const [checked, setChecked] = useState(false);
   const [attempts, setAttempts] = useState(0);
@@ -35,7 +37,11 @@ function SequenceBoard({ sequence, recordKey }: SequenceGameProps) {
   }
 
   function check() {
-    if (attempts === 0) record(recordKey, inOrder);
+    if (attempts === 0) {
+      record({ id: recordKey, correct: inOrder, finish: inOrder ? { perfect: true } : undefined });
+    } else if (inOrder) {
+      complete({ perfect: false });
+    }
     setAttempts((n) => n + 1);
     setChecked(true);
   }
@@ -100,6 +106,7 @@ function SequenceBoard({ sequence, recordKey }: SequenceGameProps) {
       <div className="flex flex-wrap items-center gap-3">
         {solved ? (
           <>
+            <Stars count={attempts === 1 ? 3 : attempts === 2 ? 2 : 1} className="[&_svg]:size-6" />
             <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
               {attempts === 1 ? '¡Perfecto a la primera!' : `Conseguido en ${attempts} intentos.`}
             </p>

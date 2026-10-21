@@ -1,8 +1,14 @@
 import { cn } from 'cn';
 
-type ProgressBarProps = { value: number; max: number; label: string; className?: string };
+type ProgressBarProps = {
+  value: number;
+  max: number;
+  label: string;
+  className?: string;
+  fillClassName?: string;
+};
 
-export function ProgressBar({ value, max, label, className }: ProgressBarProps) {
+export function ProgressBar({ value, max, label, className, fillClassName }: ProgressBarProps) {
   return (
     <div
       role="progressbar"
@@ -13,7 +19,10 @@ export function ProgressBar({ value, max, label, className }: ProgressBarProps) 
       className={cn('h-1.5 overflow-hidden rounded-full bg-muted', className)}
     >
       <div
-        className="h-full rounded-[inherit] bg-primary transition-[width] duration-300"
+        className={cn(
+          'h-full rounded-[inherit] transition-[width] duration-300',
+          fillClassName ?? 'bg-primary',
+        )}
         style={{ width: `${(value / Math.max(max, 1)) * 100}%` }}
       />
     </div>

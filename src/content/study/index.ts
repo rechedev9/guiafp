@@ -60,4 +60,9 @@ export const clozeOf = (subject: Subject, unitId?: string): StudyCloze[] =>
 export const sequencesOf = (subject: Subject, unitId?: string) =>
   unitsOf(subject, unitId).flatMap((unit) => unit.sequences ?? []);
 
+// Every study id starts with its subject slug, as built above.
+export const subjectSlugOf = (id: string) => id.split('/')[0] ?? '';
+
 export const allCards = () => subjects.flatMap((subject) => cardsOf(subject));
+
+export const allQuiz = () => subjects.flatMap((subject) => quizOf(subject));

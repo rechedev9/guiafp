@@ -5,6 +5,7 @@ export type Route =
   | { page: 'guide'; anchor?: string }
   | { page: 'study' }
   | { page: 'review' }
+  | { page: 'challenge' }
   | { page: 'subject'; slug: string; mode?: string };
 
 const subscribe = (onChange: () => void) => {
@@ -19,6 +20,7 @@ function parseRoute(hash: string): Route {
   if (root !== 'estudiar') return { page: 'guide', anchor: root || undefined };
   if (!slug) return { page: 'study' };
   if (slug === 'repaso') return { page: 'review' };
+  if (slug === 'desafio') return { page: 'challenge' };
   return { page: 'subject', slug, mode };
 }
 

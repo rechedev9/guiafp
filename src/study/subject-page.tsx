@@ -21,6 +21,7 @@ import { ClozeDrill } from '@/study/cloze-drill';
 import { CourseCalendar } from '@/study/course-calendar';
 import { Flashcards } from '@/study/flashcards';
 import { MatchGame } from '@/study/match-game';
+import { MedalBadge } from '@/study/medal-badge';
 import { Quiz } from '@/study/quiz';
 import { SequenceGame } from '@/study/sequence-game';
 import { Syllabus } from '@/study/syllabus';
@@ -144,6 +145,7 @@ export function SubjectPage({ subject, mode }: SubjectPageProps) {
             {subject.code}
           </Badge>
           <ExamBadge subject={subject} />
+          <MedalBadge mastered={stats.mastered} total={stats.total} />
         </div>
         <h1 className="text-3xl font-semibold tracking-tight text-balance">{subject.title}</h1>
         <p className="max-w-3xl leading-relaxed text-muted-foreground">{subject.lead}</p>

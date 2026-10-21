@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { StudyCard } from '@/content/study';
 import { shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
+import { SessionDone, useSessionXp } from '@/study/celebration';
 
 const PAIRS = 6;
 const PENALTY_MS = 3000;
@@ -41,6 +42,9 @@ export function MatchGame({ cards, recordKey }: MatchGameProps) {
   const pool = cards.filter(fits);
   const best = useStudyStore((state) => state.bestTimes[recordKey]);
   const saveTime = useStudyStore((state) => state.saveTime);
+  const hit = useStudyStore((state) => state.hit);
+  const session = useSessionXp();
+  const [bestBefore, setBestBefore] = useState(best);
   const [round, setRound] = useState(() => newRound(pool));
   const [left, setLeft] = useState<string | null>(null);
   const [right, setRight] = useState<string | null>(null);
@@ -78,13 +82,16 @@ export function MatchGame({ cards, recordKey }: MatchGameProps) {
     setRight(null);
     if (nextLeft === nextRight) {
       const done = [...matched, nextLeft];
+      const finished = done.length === total;
       setMatched(done);
-      if (done.length === total) {
+      hit({ correct: true, finish: finished ? { perfect: mistakes === 0 } : undefined });
+      if (finished) {
         const time = at - start + mistakes * PENALTY_MS;
         setFinalTime(time);
         saveTime(recordKey, time);
       }
     } else {
+      hit({ correct: false });
       setMistakes((m) => m + 1);
       setWrong([`left:${nextLeft}`, `right:${nextRight}`]);
       window.setTimeout(() => setWrong([]), 500);
@@ -99,6 +106,8 @@ export function MatchGame({ cards, recordKey }: MatchGameProps) {
     setMistakes(0);
     setStartedAt(null);
     setFinalTime(null);
+    setBestBefore(best);
+    session.reset();
   }
 
   if (pool.length < 4) {
@@ -112,8 +121,8 @@ export function MatchGame({ cards, recordKey }: MatchGameProps) {
   function tileClass(side: Side, id: string) {
     const selected = (side === 'left' ? left : right) === id;
     return cn(
-      'min-h-14 rounded-xl border bg-card px-3 py-2 text-left text-sm leading-snug transition-[opacity,transform,border-color,background-color] duration-200 sm:text-base',
-      'hover:border-primary/50 active:scale-[0.98]',
+      'pressable min-h-14 rounded-xl bg-card px-3 py-2 text-left text-sm leading-snug transition-[opacity,transform,border-color,background-color] duration-200 sm:text-base',
+      'hover:-translate-y-0.5 hover:border-primary/50',
       selected && 'border-primary bg-primary/10 ring-2 ring-primary/30',
       wrong.includes(`${side}:${id}`) && 'animate-shake border-destructive bg-destructive/10',
       matched.includes(id) &&
@@ -140,20 +149,26 @@ export function MatchGame({ cards, recordKey }: MatchGameProps) {
       </div>
 
       {finalTime !== null ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border bg-card p-8 text-center">
-          <TrophyIcon className="size-10 text-amber-500" />
-          <p className="text-lg font-semibold">
-            {best !== undefined && finalTime <= best ? '¡Nuevo récord! ' : ''}
-            {seconds(finalTime)}
-          </p>
+        <SessionDone
+          title={
+            bestBefore === undefined || finalTime < bestBefore
+              ? `¡Nuevo récord! ${seconds(finalTime)}`
+              : seconds(finalTime)
+          }
+          xp={session.gained}
+          stars={mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1}
+          celebrate
+          actions={
+            <Button onClick={reset}>
+              <RotateCcwIcon />
+              Otra ronda
+            </Button>
+          }
+        >
           <p className="max-w-sm text-sm text-muted-foreground">
             Cada ronda saca parejas distintas. Intenta bajar tu tiempo sin fallos.
           </p>
-          <Button onClick={reset}>
-            <RotateCcwIcon />
-            Otra ronda
-          </Button>
-        </div>
+        </SessionDone>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           {(['left', 'right'] as const).map((side) => (

@@ -1,6 +1,22 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { subjectSlugOf, subjects } from '@/content/study';
 import { today } from '@/lib/dates';
+import {
+  achievements,
+  DAILY_GOAL,
+  type DayLog,
+  emptyDay,
+  emptyTotals,
+  levelOf,
+  multiplier,
+  type Progress,
+  QUEST_BONUS,
+  quests,
+  type Totals,
+} from '@/lib/game';
+import { play, type Sound } from '@/lib/sfx';
+import { type Toast, useGameFeed } from '@/stores/game-feed';
 
 export type Grade = 'again' | 'hard' | 'good' | 'easy';
 
@@ -28,52 +44,38 @@ export function schedule(state: CardState | undefined, grade: Grade): CardState 
   return { ...prev, box, due: day + interval(box), reviews };
 }
 
-type StudyState = {
+const cardXp: Record<Grade, number> = { again: 2, hard: 6, good: 10, easy: 12 };
+
+type Finish = { perfect: boolean; run?: number };
+
+// correct: true grows the combo and multiplies the XP, false breaks it, undefined leaves it.
+type Gain = { xp: number; correct?: boolean; cards?: number; right?: number; finish?: Finish };
+
+type Saved = {
   cards: Record<string, CardState>;
   answers: Record<string, { right: number; wrong: number }>;
   bestTimes: Record<string, number>;
   activity: Record<string, number>;
-  grade: (id: string, grade: Grade) => void;
-  answer: (id: string, correct: boolean) => void;
+  xp: number;
+  days: Record<string, DayLog>;
+  totals: Totals;
+  badges: Record<string, number>;
+  muted: boolean;
+};
+
+type StudyState = Saved & {
+  grade: (review: { id: string; grade: Grade; finish?: Finish }) => void;
+  answer: (result: { id: string; correct: boolean; finish?: Finish }) => void;
+  hit: (result: { correct: boolean; finish?: Finish }) => void;
+  complete: (finish: Finish) => void;
   saveTime: (key: string, ms: number) => void;
+  toggleMute: () => void;
 };
 
 const bump = (activity: Record<string, number>) => {
   const day = String(today());
   return { ...activity, [day]: (activity[day] ?? 0) + 1 };
 };
-
-export const useStudyStore = create<StudyState>()(
-  persist(
-    (set) => ({
-      cards: {},
-      answers: {},
-      bestTimes: {},
-      activity: {},
-      grade: (id, grade) =>
-        set((state) => ({
-          cards: { ...state.cards, [id]: schedule(state.cards[id], grade) },
-          activity: bump(state.activity),
-        })),
-      answer: (id, correct) =>
-        set((state) => {
-          const prev = state.answers[id] ?? { right: 0, wrong: 0 };
-          const next = correct
-            ? { ...prev, right: prev.right + 1 }
-            : { ...prev, wrong: prev.wrong + 1 };
-          return { answers: { ...state.answers, [id]: next }, activity: bump(state.activity) };
-        }),
-      saveTime: (key, ms) =>
-        set((state) => {
-          const best = state.bestTimes[key];
-          return best !== undefined && best <= ms
-            ? state
-            : { bestTimes: { ...state.bestTimes, [key]: ms } };
-        }),
-    }),
-    { name: 'guiafp-study' },
-  ),
-);
 
 export function streak(activity: Record<string, number>) {
   let day = today();
@@ -86,6 +88,142 @@ export function streak(activity: Record<string, number>) {
   }
   return count;
 }
+
+function progressOf(state: Saved): Progress {
+  const practised = new Set(
+    [...Object.keys(state.cards), ...Object.keys(state.answers)].map(subjectSlugOf),
+  );
+  return {
+    xp: state.xp,
+    totals: state.totals,
+    streak: streak(state.activity),
+    mastered: deckStats(Object.keys(state.cards), state.cards).mastered,
+    fastestMatch: Math.min(Infinity, ...Object.values(state.bestTimes)),
+    goalDays: Object.values(state.days).filter((day) => day.xp >= DAILY_GOAL).length,
+    subjects: subjects.filter((subject) => practised.has(subject.slug)).length,
+    subjectCount: subjects.length,
+  };
+}
+
+type SoundCause = { levelUp: boolean; toasts: number; gain: Gain };
+
+function soundOf({ levelUp, toasts, gain }: SoundCause): Sound | undefined {
+  if (levelUp) return 'level';
+  if (toasts > 0) return 'badge';
+  if (gain.finish) return 'done';
+  if (gain.correct === undefined) return undefined;
+  return gain.correct ? 'right' : 'wrong';
+}
+
+let eventId = 0;
+
+type RewardOptions = { state: Saved; gain: Gain; patch?: Partial<Saved> };
+
+// Side effects: pushes toasts to the game feed and plays one sound.
+function reward({ state, gain, patch }: RewardOptions): Saved {
+  const feed = useGameFeed.getState();
+  const key = String(today());
+  const { finish } = gain;
+  const combo = gain.correct === undefined ? feed.combo : gain.correct ? feed.combo + 1 : 0;
+  const earned =
+    (gain.correct ? gain.xp * multiplier(combo) : gain.xp) +
+    (finish ? (finish.perfect ? 50 : 25) : 0);
+  const before = state.days[key] ?? emptyDay;
+  const day = {
+    xp: before.xp + earned,
+    cards: before.cards + (gain.cards ?? 0),
+    right: before.right + (gain.right ?? 0),
+    games: before.games + (finish ? 1 : 0),
+  };
+  const toasts: Toast[] = [];
+  const add = (toast: Omit<Toast, 'id'>) => toasts.push({ ...toast, id: ++eventId });
+  for (const quest of quests) {
+    if (quest.value(before) >= quest.goal || quest.value(day) < quest.goal) continue;
+    day.xp += QUEST_BONUS;
+    add({ kind: 'quest', title: 'Misión cumplida', detail: `${quest.title}: +${QUEST_BONUS} XP` });
+  }
+  const gained = day.xp - before.xp;
+  const next: Saved = {
+    ...state,
+    ...patch,
+    xp: state.xp + gained,
+    days: { ...state.days, [key]: day },
+    totals: {
+      cards: state.totals.cards + (gain.cards ?? 0),
+      perfect: state.totals.perfect + (finish?.perfect ? 1 : 0),
+      bestCombo: Math.max(state.totals.bestCombo, combo),
+      bestRun: Math.max(state.totals.bestRun, finish?.run ?? 0),
+    },
+    activity: bump(state.activity),
+  };
+
+  const level = levelOf(next.xp);
+  const levelUp = level.level > levelOf(state.xp).level;
+  if (levelUp) {
+    add({ kind: 'level', title: `¡Nivel ${level.level}!`, detail: `Ahora eres ${level.rank}` });
+  }
+  const progress = progressOf(next);
+  const badges = { ...state.badges };
+  for (const badge of achievements) {
+    if (badges[badge.id] !== undefined || !badge.test(progress)) continue;
+    badges[badge.id] = today();
+    add({ kind: 'badge', title: `Logro: ${badge.title}`, detail: badge.text });
+  }
+
+  const sound = soundOf({ levelUp, toasts: toasts.length, gain });
+  if (sound && !state.muted) play(sound, combo);
+  useGameFeed.setState({
+    combo,
+    lastGain: gained > 0 ? { id: ++eventId, xp: gained } : feed.lastGain,
+    toasts: [...feed.toasts, ...toasts].slice(-3),
+  });
+  return { ...next, badges };
+}
+
+export const useStudyStore = create<StudyState>()(
+  persist(
+    (set, get) => ({
+      cards: {},
+      answers: {},
+      bestTimes: {},
+      activity: {},
+      xp: 0,
+      days: {},
+      totals: emptyTotals,
+      badges: {},
+      muted: false,
+      grade: ({ id, grade, finish }) => {
+        const state = get();
+        const cards = { ...state.cards, [id]: schedule(state.cards[id], grade) };
+        const correct = grade === 'again' ? false : grade === 'hard' ? undefined : true;
+        const gain = { xp: cardXp[grade], correct, cards: 1, finish };
+        set(reward({ state, gain, patch: { cards } }));
+      },
+      answer: ({ id, correct, finish }) => {
+        const state = get();
+        const prev = state.answers[id] ?? { right: 0, wrong: 0 };
+        const stats = correct
+          ? { ...prev, right: prev.right + 1 }
+          : { ...prev, wrong: prev.wrong + 1 };
+        const answers = { ...state.answers, [id]: stats };
+        const gain = { xp: correct ? 10 : 2, correct, right: correct ? 1 : 0, finish };
+        set(reward({ state, gain, patch: { answers } }));
+      },
+      hit: ({ correct, finish }) =>
+        set(reward({ state: get(), gain: { xp: correct ? 5 : 0, correct, finish } })),
+      complete: (finish) => set(reward({ state: get(), gain: { xp: 0, finish } })),
+      saveTime: (key, ms) =>
+        set((state) => {
+          const best = state.bestTimes[key];
+          return best !== undefined && best <= ms
+            ? state
+            : { bestTimes: { ...state.bestTimes, [key]: ms } };
+        }),
+      toggleMute: () => set((state) => ({ muted: !state.muted })),
+    }),
+    { name: 'guiafp-study' },
+  ),
+);
 
 export type DeckStats = { total: number; fresh: number; due: number; mastered: number };
 

@@ -1,13 +1,15 @@
 import { cn } from 'cn';
-import { CheckCircle2Icon, EyeIcon, RotateCcwIcon } from 'lucide-react';
+import { EyeIcon, RotateCcwIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ProgressBar } from '@/components/progress-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { StudyCard } from '@/content/study';
 import { today } from '@/lib/dates';
+import { starsFor } from '@/lib/game';
 import { canSpeak, hasModifier, onControl, shuffle } from '@/lib/study';
 import { type CardState, type Grade, schedule, useStudyStore } from '@/stores/study-store';
+import { SessionDone, useSessionXp } from '@/study/celebration';
 import { SpeakButton } from '@/study/speak-button';
 
 const NEW_PER_SESSION = 12;
@@ -60,6 +62,7 @@ type FlashcardsProps = { cards: StudyCard[]; mixed?: boolean };
 export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
   const states = useStudyStore((state) => state.cards);
   const gradeCard = useStudyStore((state) => state.grade);
+  const session = useSessionXp();
   const [queue, setQueue] = useState(() => buildQueue({ cards, states, mixed }));
   const [revealed, setRevealed] = useState(false);
   const [attempt, setAttempt] = useState('');
@@ -72,13 +75,15 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
     const next = all ? shuffle(cards) : buildQueue({ cards, states, mixed });
     setQueue(next);
     setTally({ reviewed: 0, again: 0 });
+    session.reset();
   }
 
   function grade(value: Grade) {
     if (!current) return;
-    gradeCard(current.id, value);
     const rest = queue.slice(1);
     if (value === 'again') rest.splice(Math.min(RETRY_GAP, rest.length), 0, current);
+    const finish = rest.length === 0 ? { perfect: tally.again === 0 } : undefined;
+    gradeCard({ id: current.id, grade: value, finish });
     setQueue(rest);
     setRevealed(false);
     setAttempt('');
@@ -112,28 +117,31 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
 
   if (!current) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-2xl border bg-card p-8 text-center">
-        <CheckCircle2Icon className="size-10 text-emerald-600 dark:text-emerald-400" />
-        <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-semibold">
-            {tally.reviewed > 0 ? 'Sesión terminada' : 'No te toca repasar nada'}
-          </h3>
-          <p className="max-w-md text-sm text-muted-foreground">
-            {tally.reviewed > 0
-              ? `Has repasado ${tally.reviewed} tarjetas (${tally.again} para repetir). Las que sabías volverán dentro de unos días, justo antes de olvidarlas.`
-              : 'Las tarjetas aparecen cuando toca repasarlas. Vuelve mañana o practica el mazo entero ahora.'}
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Button onClick={() => restart(false)}>
-            <RotateCcwIcon />
-            Buscar más tarjetas
-          </Button>
-          <Button variant="outline" onClick={() => restart(true)}>
-            Practicar el mazo entero
-          </Button>
-        </div>
-      </div>
+      <SessionDone
+        title={tally.reviewed > 0 ? '¡Sesión terminada!' : 'No te toca repasar nada'}
+        xp={session.gained}
+        stars={
+          tally.reviewed > 0 ? starsFor(tally.reviewed - tally.again, tally.reviewed) : undefined
+        }
+        celebrate={tally.reviewed > 0}
+        actions={
+          <>
+            <Button onClick={() => restart(false)}>
+              <RotateCcwIcon />
+              Buscar más tarjetas
+            </Button>
+            <Button variant="outline" onClick={() => restart(true)}>
+              Practicar el mazo entero
+            </Button>
+          </>
+        }
+      >
+        <p className="max-w-md text-sm text-muted-foreground">
+          {tally.reviewed > 0
+            ? `Has repasado ${tally.reviewed} tarjetas (${tally.again} para repetir). Las que sabías volverán dentro de unos días, justo antes de olvidarlas.`
+            : 'Las tarjetas aparecen cuando toca repasarlas. Vuelve mañana o practica el mazo entero ahora.'}
+        </p>
+      </SessionDone>
     );
   }
 
@@ -221,7 +229,7 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
                 key={g.grade}
                 variant="outline"
                 onClick={() => grade(g.grade)}
-                className={cn('h-auto flex-col gap-0.5 py-2', g.className)}
+                className={cn('pressable h-auto flex-col gap-0.5 py-2', g.className)}
               >
                 <span className="font-semibold">{g.label}</span>
                 <span className="text-xs text-muted-foreground">{waitLabel(state, g.grade)}</span>

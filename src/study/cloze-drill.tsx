@@ -1,9 +1,11 @@
-import { ArrowRightIcon, CheckCircle2Icon, LightbulbIcon, RotateCcwIcon } from 'lucide-react';
+import { ArrowRightIcon, LightbulbIcon, RotateCcwIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { StudyCloze } from '@/content/study';
+import { starsFor } from '@/lib/game';
 import { isCorrect, shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
+import { SessionDone, useSessionXp } from '@/study/celebration';
 import { SpeakButton } from '@/study/speak-button';
 
 const SESSION = 12;
@@ -12,6 +14,9 @@ type ClozeDrillProps = { items: StudyCloze[]; lang?: string };
 
 export function ClozeDrill({ items, lang }: ClozeDrillProps) {
   const record = useStudyStore((state) => state.answer);
+  const hit = useStudyStore((state) => state.hit);
+  const complete = useStudyStore((state) => state.complete);
+  const session = useSessionXp();
   const [queue, setQueue] = useState(() => shuffle(items).slice(0, SESSION));
   const [input, setInput] = useState('');
   const [result, setResult] = useState<'right' | 'wrong' | null>(null);
@@ -22,13 +27,15 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
   function settle(correct: boolean) {
     if (!current) return;
     setResult(correct ? 'right' : 'wrong');
-    if (!firstTry.seen.has(current.id)) {
-      record(current.id, correct);
-      setFirstTry((prev) => ({
-        right: prev.right + (correct ? 1 : 0),
-        seen: new Set(prev.seen).add(current.id),
-      }));
+    if (firstTry.seen.has(current.id)) {
+      hit({ correct });
+      return;
     }
+    record({ id: current.id, correct });
+    setFirstTry((prev) => ({
+      right: prev.right + (correct ? 1 : 0),
+      seen: new Set(prev.seen).add(current.id),
+    }));
   }
 
   function check() {
@@ -38,6 +45,9 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
 
   function next() {
     if (!current) return;
+    if (result === 'right' && queue.length === 1) {
+      complete({ perfect: firstTry.right === firstTry.seen.size });
+    }
     // A wrong answer comes back at the end, until it is produced without help.
     setQueue((prev) => (result === 'wrong' ? [...prev.slice(1), current] : prev.slice(1)));
     setInput('');
@@ -47,22 +57,28 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
 
   if (!current) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-2xl border bg-card p-8 text-center">
-        <CheckCircle2Icon className="size-10 text-emerald-600 dark:text-emerald-400" />
-        <p className="max-w-md text-muted-foreground">
-          {firstTry.right} de {firstTry.seen.size} a la primera. Las que fallaste las has repetido
-          hasta escribirlas bien.
+      <SessionDone
+        title={`${firstTry.right} de ${firstTry.seen.size} a la primera`}
+        xp={session.gained}
+        stars={starsFor(firstTry.right, firstTry.seen.size)}
+        celebrate
+        actions={
+          <Button
+            onClick={() => {
+              setQueue(shuffle(items).slice(0, SESSION));
+              setFirstTry({ right: 0, seen: new Set() });
+              session.reset();
+            }}
+          >
+            <RotateCcwIcon />
+            Otra ronda
+          </Button>
+        }
+      >
+        <p className="max-w-md text-sm text-muted-foreground">
+          Las que fallaste las has repetido hasta escribirlas bien.
         </p>
-        <Button
-          onClick={() => {
-            setQueue(shuffle(items).slice(0, SESSION));
-            setFirstTry({ right: 0, seen: new Set() });
-          }}
-        >
-          <RotateCcwIcon />
-          Otra ronda
-        </Button>
-      </div>
+      </SessionDone>
     );
   }
 

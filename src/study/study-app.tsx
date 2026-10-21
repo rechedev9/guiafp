@@ -1,7 +1,9 @@
 import { ArrowLeftIcon } from 'lucide-react';
 import { allCards, findSubject } from '@/content/study';
 import { type Route, studyHref } from '@/lib/route';
+import { Challenge } from '@/study/challenge';
 import { Flashcards } from '@/study/flashcards';
+import { PlayerHud } from '@/study/player-hud';
 import { StudyHome } from '@/study/study-home';
 import { SubjectPage } from '@/study/subject-page';
 
@@ -33,6 +35,14 @@ function StudyRoute({ route }: { route: Route }) {
       </div>
     );
   }
+  if (route.page === 'challenge') {
+    return (
+      <div className="flex flex-col gap-6">
+        <BackLink />
+        <Challenge />
+      </div>
+    );
+  }
   if (route.page === 'subject') {
     const subject = findSubject(route.slug);
     if (subject) return <SubjectPage key={subject.slug} subject={subject} mode={route.mode} />;
@@ -42,8 +52,11 @@ function StudyRoute({ route }: { route: Route }) {
 
 export function StudyApp({ route }: { route: Route }) {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
-      <StudyRoute route={route} />
-    </main>
+    <>
+      <PlayerHud />
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+        <StudyRoute route={route} />
+      </main>
+    </>
   );
 }
