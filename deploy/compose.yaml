@@ -1,0 +1,13 @@
+# Static guide for guiafp.rechedev.cloud. The shared edge Caddy proxies to this port.
+# Mounts the parent folder: a bind mount of site/ itself would keep pointing at the replaced folder.
+name: guiafp
+
+services:
+  web:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    command: caddy file-server --root /data/site --listen :8080
+    ports:
+      - '127.0.0.1:8130:8080'
+    volumes:
+      - ./:/data:ro
