@@ -13,7 +13,7 @@ export type Shot = {
   markers: Marker[];
 };
 
-type CourseCode = 'TUT' | 'AP-2' | 'HCIB' | 'IPO-2' | 'PI' | 'SLEA-1' | 'SLEA-2';
+export type CourseCode = 'TUT' | 'AP-2' | 'HCIB' | 'IPO-2' | 'PI' | 'SLEA-1' | 'SLEA-2';
 
 type Course = {
   short: string;

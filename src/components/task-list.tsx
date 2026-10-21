@@ -1,14 +1,14 @@
 import { cn } from 'cn';
 import { ExternalLinkIcon } from 'lucide-react';
 import { ExternalLink } from '@/components/external-link';
+import { ProgressBar } from '@/components/progress-bar';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { courses, type Task } from '@/content/guide';
-import { TIME_ZONE } from '@/lib/dates';
+import { daysUntil, relativeDays, TIME_ZONE } from '@/lib/dates';
 import { useChecklistStore } from '@/stores/checklist-store';
 
-const DAY_MS = 86_400_000;
 // Read once per page load; the countdown only needs day precision.
 const now = Date.now();
 const dateFormat = new Intl.DateTimeFormat('es-ES', {
@@ -17,24 +17,20 @@ const dateFormat = new Intl.DateTimeFormat('es-ES', {
   month: 'short',
   timeZone: TIME_ZONE,
 });
-// en-CA formats as YYYY-MM-DD, which Date.parse reads as UTC midnight.
-const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE });
-const campusDay = (time: number) => Date.parse(dayKey.format(time)) / DAY_MS;
 
 function DeadlineBadge({ deadline }: { deadline: string | null }) {
   if (!deadline) {
     return <Badge variant="outline">Fecha dentro de la tarea</Badge>;
   }
   const date = new Date(deadline);
-  const days = campusDay(date.getTime()) - campusDay(now);
+  const days = daysUntil(deadline);
   const label = dateFormat.format(date);
   if (date.getTime() < now) {
     return <Badge variant="secondary">Cerrado ({label})</Badge>;
   }
-  const left = days === 0 ? 'hoy' : days === 1 ? 'mañana' : `en ${days} días`;
   return (
     <Badge variant={days <= 7 ? 'destructive' : 'secondary'}>
-      {label}, {left}
+      {label}, {relativeDays(days)}
     </Badge>
   );
 }
@@ -57,19 +53,7 @@ export function TaskList({ title, tasks }: TaskListProps) {
           {count} de {tasks.length}
         </span>
       </header>
-      <div
-        role="progressbar"
-        aria-label={title}
-        aria-valuemin={0}
-        aria-valuemax={tasks.length}
-        aria-valuenow={count}
-        className="h-1 bg-muted"
-      >
-        <div
-          className="h-full bg-primary transition-[width] duration-300"
-          style={{ width: `${(count / tasks.length) * 100}%` }}
-        />
-      </div>
+      <ProgressBar value={count} max={tasks.length} label={title} className="h-1 rounded-none" />
       <ul className="divide-y">
         {tasks.map((task) => (
           <li key={task.id} className="flex items-start gap-3 p-4">
