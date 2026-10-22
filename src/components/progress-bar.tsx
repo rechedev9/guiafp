@@ -16,7 +16,7 @@ export function ProgressBar({ value, max, label, className, fillClassName }: Pro
       aria-valuemin={0}
       aria-valuemax={max}
       aria-valuenow={value}
-      className={cn('h-1.5 overflow-hidden rounded-full bg-muted', className)}
+      className={cn('h-1 overflow-hidden rounded-full bg-muted', className)}
     >
       <div
         className={cn(

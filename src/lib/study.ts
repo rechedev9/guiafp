@@ -12,6 +12,9 @@ export function shuffle<T>(items: readonly T[]): T[] {
   return copy;
 }
 
+export const percent = (part: number, whole: number) =>
+  whole ? Math.round((part / whole) * 100) : 0;
+
 // Window shortcuts skip browser combos and must not steal Enter or Space from a focused control.
 export const hasModifier = (event: KeyboardEvent) => event.altKey || event.ctrlKey || event.metaKey;
 

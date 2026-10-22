@@ -1,40 +1,24 @@
 import { cn } from 'cn';
-import { EyeIcon, RotateCcwIcon } from 'lucide-react';
+import { RotateCcwIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ProgressBar } from '@/components/progress-bar';
-import { Badge } from '@/components/ui/badge';
+import { Kbd } from '@/components/kbd';
 import { Button } from '@/components/ui/button';
 import type { StudyCard } from '@/content/study';
 import { today } from '@/lib/dates';
-import { starsFor } from '@/lib/game';
-import { canSpeak, hasModifier, onControl, shuffle } from '@/lib/study';
+import { canSpeak, hasModifier, onControl, percent, shuffle } from '@/lib/study';
 import { type CardState, type Grade, schedule, useStudyStore } from '@/stores/study-store';
-import { SessionDone, useSessionXp } from '@/study/celebration';
+import { SessionBar } from '@/study/session-bar';
+import { SessionDone, useSessionXp } from '@/study/session-done';
 import { SpeakButton } from '@/study/speak-button';
 
-const NEW_PER_SESSION = 12;
+export const NEW_PER_SESSION = 12;
 const RETRY_GAP = 3;
 
 const grades: { grade: Grade; label: string; key: string; className: string }[] = [
-  {
-    grade: 'again',
-    label: 'Otra vez',
-    key: '1',
-    className: 'border-destructive/40 text-destructive',
-  },
-  {
-    grade: 'hard',
-    label: 'Difícil',
-    key: '2',
-    className: 'border-amber-500/50 text-amber-700 dark:text-amber-400',
-  },
-  { grade: 'good', label: 'Bien', key: '3', className: 'border-primary/50 text-primary' },
-  {
-    grade: 'easy',
-    label: 'Fácil',
-    key: '4',
-    className: 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400',
-  },
+  { grade: 'again', label: 'Otra vez', key: '1', className: 'text-destructive' },
+  { grade: 'hard', label: 'Difícil', key: '2', className: 'text-warning' },
+  { grade: 'good', label: 'Bien', key: '3', className: 'text-primary' },
+  { grade: 'easy', label: 'Fácil', key: '4', className: 'text-success' },
 ];
 
 type QueueOptions = { cards: StudyCard[]; states: Record<string, CardState>; mixed: boolean };
@@ -116,14 +100,23 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
   });
 
   if (!current) {
+    const remembered = tally.reviewed - tally.again;
     return (
       <SessionDone
-        title={tally.reviewed > 0 ? '¡Sesión terminada!' : 'No te toca repasar nada'}
+        title={tally.reviewed > 0 ? 'Sesión terminada' : 'Nada pendiente por ahora'}
         xp={session.gained}
-        stars={
-          tally.reviewed > 0 ? starsFor(tally.reviewed - tally.again, tally.reviewed) : undefined
+        stats={
+          tally.reviewed > 0
+            ? [
+                { label: 'Repasos', value: tally.reviewed },
+                {
+                  label: 'Recordadas',
+                  value: `${percent(remembered, tally.reviewed)} %`,
+                },
+                { label: 'Para repetir', value: tally.again },
+              ]
+            : undefined
         }
-        celebrate={tally.reviewed > 0}
         actions={
           <>
             <Button onClick={() => restart(false)}>
@@ -136,9 +129,9 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
           </>
         }
       >
-        <p className="max-w-md text-sm text-muted-foreground">
+        <p className="max-w-prose text-sm text-muted-foreground">
           {tally.reviewed > 0
-            ? `Has repasado ${tally.reviewed} tarjetas (${tally.again} para repetir). Las que sabías volverán dentro de unos días, justo antes de olvidarlas.`
+            ? 'Las que sabías volverán dentro de unos días, justo antes de olvidarlas.'
             : 'Las tarjetas aparecen cuando toca repasarlas. Vuelve mañana o practica el mazo entero ahora.'}
         </p>
       </SessionDone>
@@ -149,33 +142,30 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
   const done = total - queue.length;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <span className="tabular-nums">
-          {Math.min(done + 1, total)} de {total}
-        </span>
-        <ProgressBar value={done} max={total} label="Tarjetas repasadas" className="flex-1" />
-        <Badge variant={state ? 'secondary' : 'outline'}>{state ? 'Repaso' : 'Nueva'}</Badge>
-      </div>
+    <div className="flex flex-col gap-3">
+      <SessionBar done={done} total={total} label="Tarjetas repasadas">
+        <span className="shrink-0">{state ? 'Repaso' : 'Nueva'}</span>
+      </SessionBar>
 
       <div
         key={current.id}
-        className="flex min-h-64 flex-col gap-4 rounded-2xl border bg-card p-6 shadow-sm duration-200 animate-in fade-in slide-in-from-bottom-2 motion-reduce:animate-none sm:p-8"
+        className={cn(
+          'flex flex-col overflow-hidden rounded-lg border bg-card duration-200 animate-in fade-in motion-reduce:animate-none',
+          !revealed && 'min-h-56',
+        )}
       >
-        <div className="flex items-start justify-between gap-3">
-          {mixed ? (
-            <Badge variant="outline">{current.subject.title}</Badge>
-          ) : (
-            <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Pregunta
-            </span>
-          )}
+        <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-7 sm:pt-6">
+          <span className="text-xs font-medium text-muted-foreground">
+            {mixed ? current.subject.title : 'Pregunta'}
+          </span>
           <SpeakButton text={current.front} lang={current.subject.speak} />
         </div>
-        <p className="text-xl font-semibold text-balance sm:text-2xl">{current.front}</p>
+        <p className="px-5 pt-1 pb-6 text-xl leading-snug font-medium text-balance sm:px-7 sm:text-2xl">
+          {current.front}
+        </p>
 
         {revealed ? (
-          <div className="flex flex-col gap-3 border-t pt-4 duration-200 animate-in fade-in motion-reduce:animate-none">
+          <div className="flex flex-col gap-2 border-t bg-muted/40 px-5 py-5 duration-200 animate-in fade-in motion-reduce:animate-none sm:px-7">
             {attempt.trim() && (
               <p className="text-sm text-muted-foreground">
                 Tu respuesta: <span className="text-foreground">{attempt}</span>
@@ -191,7 +181,7 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
           </div>
         ) : (
           <form
-            className="mt-auto flex flex-col gap-3"
+            className="mt-auto flex flex-col gap-3 border-t px-5 py-5 sm:px-7"
             onSubmit={(event) => {
               event.preventDefault();
               setRevealed(true);
@@ -207,37 +197,40 @@ export function Flashcards({ cards, mixed = false }: FlashcardsProps) {
                 }
               }}
               rows={2}
-              placeholder="Intenta responder de memoria antes de mirar (opcional)"
-              className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-base outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              aria-label="Tu respuesta, opcional"
+              placeholder="Escribe la respuesta de memoria antes de mirar (opcional)"
+              className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-base outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
-            <Button type="submit" size="lg" className="self-start">
-              <EyeIcon />
-              Ver respuesta
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button type="submit" size="lg">
+                Mostrar respuesta
+              </Button>
+              <Kbd className="hidden sm:inline-flex">Espacio</Kbd>
+            </div>
           </form>
         )}
       </div>
 
       {revealed && (
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">
-            ¿Cómo te ha ido? Responde con sinceridad: así se ajusta el repaso.
-          </p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-4 gap-px overflow-hidden rounded-lg border bg-border">
             {grades.map((g) => (
-              <Button
+              <button
                 key={g.grade}
-                variant="outline"
+                type="button"
                 onClick={() => grade(g.grade)}
-                className={cn('pressable h-auto flex-col gap-0.5 py-2', g.className)}
+                className="flex min-h-16 flex-col items-center justify-center gap-0.5 bg-card px-1 py-2 transition-colors hover:bg-muted"
               >
-                <span className="font-semibold">{g.label}</span>
-                <span className="text-xs text-muted-foreground">{waitLabel(state, g.grade)}</span>
-              </Button>
+                <span className={cn('text-sm font-semibold', g.className)}>{g.label}</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {waitLabel(state, g.grade)}
+                </span>
+                <Kbd className="mt-1 hidden sm:inline-flex">{g.key}</Kbd>
+              </button>
             ))}
           </div>
-          <p className="hidden text-xs text-muted-foreground sm:block">
-            Atajos: espacio para ver la respuesta, teclas 1 a 4 para valorar.
+          <p className="text-xs text-muted-foreground">
+            Debajo de cada botón, cuándo volverá la tarjeta. Valora con sinceridad.
           </p>
         </div>
       )}

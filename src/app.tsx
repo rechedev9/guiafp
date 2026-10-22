@@ -1,11 +1,14 @@
 import { cn } from 'cn';
-import { BrainIcon, CompassIcon } from 'lucide-react';
+import { GraduationCapIcon } from 'lucide-react';
 import { lazy, Suspense, useEffect } from 'react';
 import { GuidePage } from '@/guide-page';
 import { scrollTarget, studyHref, useRoute } from '@/lib/route';
 
 const loadStudy = () => import('@/study/study-app');
 const StudyApp = lazy(() => loadStudy().then((module) => ({ default: module.StudyApp })));
+const StudyStatus = lazy(() =>
+  import('@/study/study-status').then((module) => ({ default: module.StudyStatus })),
+);
 
 export function App() {
   const route = useRoute();
@@ -27,32 +30,48 @@ export function App() {
   }, [target]);
 
   const tabs = [
-    { href: '#/', label: 'Guía', more: ' del campus', icon: CompassIcon, active: !studying },
-    { href: studyHref(), label: 'Estudiar', icon: BrainIcon, active: studying },
+    { href: studyHref(), label: 'Estudiar', active: studying },
+    { href: '#/', label: 'Guía', more: ' del campus', active: !studying },
   ];
 
   return (
     <div className="min-h-screen">
-      <div className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
-        <nav aria-label="Principal" className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
-          <span className="mr-auto font-semibold tracking-tight whitespace-nowrap">FP Virtual</span>
+      <div className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur">
+        <nav aria-label="Principal" className="mx-auto flex h-12 max-w-6xl items-center gap-1 px-4">
+          <a
+            href={studyHref()}
+            className="mr-3 flex items-center gap-2 font-semibold tracking-tight whitespace-nowrap"
+          >
+            <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <GraduationCapIcon className="size-3.5" />
+            </span>
+            <span className="hidden min-[400px]:inline">Guía FP</span>
+          </a>
           {tabs.map((tab) => (
             <a
               key={tab.href}
               href={tab.href}
               aria-current={tab.active ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors',
+                'relative flex h-12 items-center px-2.5 text-sm font-medium whitespace-nowrap transition-colors',
                 tab.active
-                  ? 'bg-primary/10 text-primary'
+                  ? 'text-foreground after:absolute after:inset-x-2.5 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <tab.icon className="size-4" />
-              {tab.label}
-              {tab.more && <span className="hidden sm:inline">{tab.more}</span>}
+              <span>
+                {tab.label}
+                {tab.more && <span className="hidden sm:inline">{tab.more}</span>}
+              </span>
             </a>
           ))}
+          <div className="ml-auto flex items-center">
+            {studying && (
+              <Suspense fallback={null}>
+                <StudyStatus />
+              </Suspense>
+            )}
+          </div>
         </nav>
       </div>
       {studying ? (

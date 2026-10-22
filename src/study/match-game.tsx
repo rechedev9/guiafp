@@ -1,11 +1,12 @@
 import { cn } from 'cn';
-import { RotateCcwIcon, TimerIcon, TrophyIcon } from 'lucide-react';
+import { RotateCcwIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { StatStrip } from '@/components/stat-strip';
 import { Button } from '@/components/ui/button';
 import type { StudyCard } from '@/content/study';
 import { shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
-import { SessionDone, useSessionXp } from '@/study/celebration';
+import { SessionDone, useSessionXp } from '@/study/session-done';
 
 const PAIRS = 6;
 const PENALTY_MS = 3000;
@@ -121,43 +122,37 @@ export function MatchGame({ cards, recordKey }: MatchGameProps) {
   function tileClass(side: Side, id: string) {
     const selected = (side === 'left' ? left : right) === id;
     return cn(
-      'pressable min-h-14 rounded-xl bg-card px-3 py-2 text-left text-sm leading-snug transition-[opacity,transform,border-color,background-color] duration-200 sm:text-base',
-      'hover:-translate-y-0.5 hover:border-primary/50',
-      selected && 'border-primary bg-primary/10 ring-2 ring-primary/30',
-      wrong.includes(`${side}:${id}`) && 'animate-shake border-destructive bg-destructive/10',
-      matched.includes(id) &&
-        'pointer-events-none scale-95 border-emerald-500/40 bg-emerald-500/10 opacity-40',
+      'min-h-14 rounded-md border bg-card px-3 py-2 text-left text-sm leading-snug transition-[opacity,border-color,background-color] duration-150 sm:text-base',
+      'hover:border-primary/40 hover:bg-accent',
+      selected && 'border-primary bg-accent ring-2 ring-primary/25',
+      wrong.includes(`${side}:${id}`) && 'border-destructive bg-destructive/10',
+      matched.includes(id) && 'pointer-events-none border-success/40 bg-success/10 opacity-50',
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-        <span className="flex items-center gap-1.5 font-medium tabular-nums">
-          <TimerIcon className="size-4 text-primary" />
-          {seconds(elapsed)}
-        </span>
-        <span className="text-muted-foreground tabular-nums">
-          {matched.length}/{total} parejas · {mistakes} fallos (+3 s cada uno)
-        </span>
-        {best !== undefined && (
-          <span className="flex items-center gap-1.5 text-muted-foreground tabular-nums">
-            <TrophyIcon className="size-4 text-amber-500" />
-            Récord {seconds(best)}
-          </span>
-        )}
-      </div>
+      <StatStrip
+        stats={[
+          { label: 'Tiempo', value: <span className="font-mono">{seconds(elapsed)}</span> },
+          { label: 'Parejas', value: `${matched.length}/${total}` },
+          { label: 'Fallos (+3 s)', value: mistakes },
+          { label: 'Récord', value: best === undefined ? 'Sin marca' : seconds(best) },
+        ]}
+      />
 
       {finalTime !== null ? (
         <SessionDone
+          xp={session.gained}
           title={
             bestBefore === undefined || finalTime < bestBefore
-              ? `¡Nuevo récord! ${seconds(finalTime)}`
-              : seconds(finalTime)
+              ? `Nuevo récord: ${seconds(finalTime)}`
+              : `Ronda terminada en ${seconds(finalTime)}`
           }
-          xp={session.gained}
-          stars={mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1}
-          celebrate
+          stats={[
+            { label: 'Fallos', value: mistakes },
+            { label: 'Mejor marca', value: seconds(Math.min(finalTime, bestBefore ?? Infinity)) },
+          ]}
           actions={
             <Button onClick={reset}>
               <RotateCcwIcon />

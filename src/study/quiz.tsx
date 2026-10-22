@@ -1,15 +1,15 @@
 import { RotateCcwIcon } from 'lucide-react';
 import { useState } from 'react';
-import { ProgressBar } from '@/components/progress-bar';
 import { Button } from '@/components/ui/button';
 import type { StudyQuiz } from '@/content/study';
-import { starsFor } from '@/lib/game';
 import { shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
-import { SessionDone, useSessionXp } from '@/study/celebration';
 import { QuestionCard, toQuestions } from '@/study/question-card';
+import { SessionBar } from '@/study/session-bar';
+import { SessionDone, useSessionXp } from '@/study/session-done';
 
 const SESSION = 10;
+const mark = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 function pickSession(
   items: StudyQuiz[],
@@ -61,15 +61,18 @@ export function Quiz({ items }: { items: StudyQuiz[] }) {
 
   if (!current) {
     const score = questions.length - missed.length;
-    const stars = starsFor(score, questions.length);
     return (
       <SessionDone
-        title={
-          missed.length === 0 ? '¡Pleno! Ni un fallo' : `${score} de ${questions.length} aciertos`
-        }
         xp={session.gained}
-        stars={stars}
-        celebrate={stars >= 2}
+        title={missed.length === 0 ? 'Test superado sin fallos' : 'Test terminado'}
+        stats={[
+          { label: 'Aciertos', value: `${score}/${questions.length}` },
+          {
+            label: 'Nota',
+            value: mark.format(questions.length ? (score / questions.length) * 10 : 0),
+          },
+          { label: 'Fallos', value: missed.length },
+        ]}
         actions={
           <>
             {missed.length > 0 && (
@@ -88,38 +91,26 @@ export function Quiz({ items }: { items: StudyQuiz[] }) {
         }
       >
         {missed.length > 0 && (
-          <>
-            <p className="text-sm text-muted-foreground">
-              Repasa los fallos ahora, mientras los tienes frescos.
-            </p>
-            <ul className="flex w-full flex-col gap-2 text-left">
+          <div className="flex flex-col gap-2">
+            <h4 className="text-sm font-medium">Revisa los fallos ahora, mientras están frescos</h4>
+            <ul className="flex flex-col divide-y rounded-lg border text-sm">
               {missed.map((item) => (
-                <li key={item.id} className="rounded-lg border p-3 text-sm">
+                <li key={item.id} className="flex flex-col gap-1 p-3">
                   <p className="font-medium">{item.q}</p>
-                  <p className="text-emerald-700 dark:text-emerald-400">{item.right}</p>
+                  <p className="text-success">{item.right}</p>
                   <p className="text-muted-foreground">{item.why}</p>
                 </li>
               ))}
             </ul>
-          </>
+          </div>
         )}
       </SessionDone>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <span className="tabular-nums">
-          Pregunta {index + 1} de {questions.length}
-        </span>
-        <ProgressBar
-          value={index}
-          max={questions.length}
-          label="Preguntas contestadas"
-          className="flex-1"
-        />
-      </div>
+    <div className="flex flex-col gap-3">
+      <SessionBar done={index} total={questions.length} label="Preguntas contestadas" />
       <QuestionCard
         key={current.item.id}
         question={current}

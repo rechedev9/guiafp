@@ -2,10 +2,10 @@ import { ArrowRightIcon, LightbulbIcon, RotateCcwIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { StudyCloze } from '@/content/study';
-import { starsFor } from '@/lib/game';
 import { isCorrect, shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
-import { SessionDone, useSessionXp } from '@/study/celebration';
+import { SessionBar } from '@/study/session-bar';
+import { SessionDone, useSessionXp } from '@/study/session-done';
 import { SpeakButton } from '@/study/speak-button';
 
 const SESSION = 12;
@@ -23,6 +23,7 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
   const [showHint, setShowHint] = useState(false);
   const [firstTry, setFirstTry] = useState({ right: 0, seen: new Set<string>() });
   const current = queue[0];
+  const total = Math.min(SESSION, items.length);
 
   function settle(correct: boolean) {
     if (!current) return;
@@ -58,10 +59,12 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
   if (!current) {
     return (
       <SessionDone
-        title={`${firstTry.right} de ${firstTry.seen.size} a la primera`}
         xp={session.gained}
-        stars={starsFor(firstTry.right, firstTry.seen.size)}
-        celebrate
+        title="Ronda terminada"
+        stats={[
+          { label: 'A la primera', value: `${firstTry.right}/${firstTry.seen.size}` },
+          { label: 'Repetidas', value: firstTry.seen.size - firstTry.right },
+        ]}
         actions={
           <Button
             onClick={() => {
@@ -86,11 +89,13 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
   const filled = `${before}${current.answer}${after}`;
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">Quedan {queue.length}.</p>
+    <div className="flex flex-col gap-3">
+      <SessionBar done={total - queue.length} total={total} label="Frases completadas">
+        {firstTry.seen.has(current.id) && <span className="shrink-0">Repetición</span>}
+      </SessionBar>
       <form
         key={current.id + String(queue.length)}
-        className="flex flex-col gap-4 rounded-2xl border bg-card p-6 shadow-sm duration-200 animate-in fade-in motion-reduce:animate-none sm:p-8"
+        className="flex flex-col gap-5 rounded-lg border bg-card p-5 duration-200 animate-in fade-in motion-reduce:animate-none sm:p-7"
         onSubmit={(event) => {
           event.preventDefault();
           if (result) next();
@@ -109,7 +114,7 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
             autoComplete="off"
             spellCheck={false}
             size={Math.max(6, current.answer.length + 2)}
-            className="mx-1 inline-block max-w-full rounded-md border-b-2 border-primary bg-primary/5 px-2 py-0.5 text-center outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="mx-1 inline-block max-w-full rounded-md border border-input bg-background px-2 py-0.5 text-center outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
           {after}
         </p>
@@ -120,9 +125,9 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
           <div className="flex items-center justify-between gap-3 border-t pt-4">
             <p className="text-sm">
               {result === 'right' ? (
-                <strong className="text-emerald-700 dark:text-emerald-400">¡Bien! </strong>
+                <strong className="text-success">Correcto. </strong>
               ) : (
-                <strong className="text-destructive">Era: {current.answer}. </strong>
+                <strong className="text-destructive">Era «{current.answer}». </strong>
               )}
               <span className="text-muted-foreground">{filled}</span>
             </p>
@@ -131,22 +136,22 @@ export function ClozeDrill({ items, lang }: ClozeDrillProps) {
         )}
         <div className="flex flex-wrap gap-2">
           {result ? (
-            <Button type="submit">
+            <Button type="submit" size="lg">
               {result === 'wrong' ? 'Entendido, la repetiré' : 'Siguiente'}
               <ArrowRightIcon />
             </Button>
           ) : (
             <>
-              <Button type="submit" disabled={!input.trim()}>
+              <Button type="submit" size="lg" disabled={!input.trim()}>
                 Comprobar
               </Button>
               {current.hint && !showHint && (
-                <Button type="button" variant="ghost" onClick={() => setShowHint(true)}>
+                <Button type="button" variant="ghost" size="lg" onClick={() => setShowHint(true)}>
                   <LightbulbIcon />
                   Pista
                 </Button>
               )}
-              <Button type="button" variant="ghost" onClick={() => settle(false)}>
+              <Button type="button" variant="ghost" size="lg" onClick={() => settle(false)}>
                 No lo sé
               </Button>
             </>

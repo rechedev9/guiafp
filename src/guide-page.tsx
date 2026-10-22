@@ -18,8 +18,9 @@ import {
 import type { ReactNode } from 'react';
 import { AnnotatedShot } from '@/components/annotated-shot';
 import { ExternalLink } from '@/components/external-link';
+import { Kbd } from '@/components/kbd';
 import { TaskList } from '@/components/task-list';
-import { Badge } from '@/components/ui/badge';
+import { StatStrip } from '@/components/stat-strip';
 import { buttonVariants } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -57,12 +58,10 @@ type SectionProps = {
 
 function Section({ id, icon, lead, children }: SectionProps) {
   return (
-    <section id={id} className="flex flex-col gap-6 border-t pt-12">
+    <section id={id} className="flex flex-col gap-5 border-t pt-10">
       <header className="flex flex-col gap-2">
-        <h2 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary [&>svg]:size-5">
-            {icon}
-          </span>
+        <h2 className="flex items-center gap-2.5 text-xl font-semibold tracking-tight sm:text-2xl">
+          <span className="text-muted-foreground [&>svg]:size-5">{icon}</span>
           {sections[id].title}
         </h2>
         <p className="max-w-prose text-muted-foreground">{lead}</p>
@@ -74,7 +73,7 @@ function Section({ id, icon, lead, children }: SectionProps) {
 
 function Tile({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border bg-card p-4">
+    <div className="flex flex-col gap-1 rounded-lg border bg-card p-4">
       <div className="font-semibold">{title}</div>
       <div className="text-sm leading-relaxed text-muted-foreground">{children}</div>
     </div>
@@ -86,7 +85,7 @@ function Steps({ items }: { items: ReactNode[] }) {
     <ol className="flex flex-col gap-3">
       {items.map((item, i) => (
         <li key={i} className="flex gap-3">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-primary text-sm font-semibold text-primary">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-md border bg-muted font-mono text-xs text-muted-foreground">
             {i + 1}
           </span>
           <span className="pt-0.5 leading-relaxed">{item}</span>
@@ -98,8 +97,8 @@ function Steps({ items }: { items: ReactNode[] }) {
 
 function Callout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm leading-relaxed">
-      <TriangleAlertIcon className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+    <div className="flex gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm leading-relaxed">
+      <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-warning" />
       <div>{children}</div>
     </div>
   );
@@ -107,30 +106,30 @@ function Callout({ children }: { children: ReactNode }) {
 
 function Key({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-medium whitespace-nowrap text-primary">
+    <Kbd className="h-auto px-1.5 py-px font-sans text-[0.9em] whitespace-nowrap text-foreground">
       {children}
-    </span>
+    </Kbd>
   );
 }
 
 export function GuidePage() {
   const stats = [
-    { label: 'asignaturas', value: String(courseList.length) },
-    { label: 'primer cierre', value: shortDay(ipoNormsClose) },
-    { label: 'cierra casi todo', value: shortDay(firstBlockClose) },
+    { label: 'Asignaturas', value: String(courseList.length) },
+    { label: 'Primer cierre', value: shortDay(ipoNormsClose) },
+    { label: 'Cierra casi todo', value: shortDay(firstBlockClose) },
   ];
 
   return (
     <>
-      <header className="border-b bg-gradient-to-b from-primary/10 to-transparent">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12 sm:py-16">
-          <Badge variant="outline" className="h-auto w-fit max-w-full py-1 whitespace-normal">
-            CFGS Guía, Información y Asistencias Turísticas, curso 2026-2027
-          </Badge>
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+      <header className="border-b">
+        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-10 sm:py-12">
+          <p className="text-sm text-muted-foreground">
+            CFGS Guía, Información y Asistencias Turísticas · curso 2026-2027
+          </p>
+          <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             Cómo seguir el curso en FP Virtual
           </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground">
+          <p className="max-w-2xl text-muted-foreground sm:text-lg">
             Todo lo que hay que saber para moverse por el campus, entregar a tiempo y aprobar, con
             capturas reales de la plataforma.
           </p>
@@ -147,25 +146,18 @@ export function GuidePage() {
               Estudiar el temario
             </a>
           </div>
-          <dl className="grid max-w-2xl grid-cols-3 gap-3">
-            {stats.map((stat) => (
-              <div key={stat.label} className="rounded-xl border bg-card p-3 sm:p-4">
-                <dt className="text-xs text-muted-foreground sm:text-sm">{stat.label}</dt>
-                <dd className="text-xl font-semibold tabular-nums sm:text-2xl">{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <StatStrip stats={stats} className="max-w-2xl" />
         </div>
       </header>
 
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[200px_1fr]">
-        <nav className="hidden lg:block">
-          <ul className="sticky top-20 flex flex-col gap-1 text-sm">
+        <nav aria-label="En esta guía" className="hidden lg:block">
+          <ul className="sticky top-18 flex flex-col gap-0.5 border-l text-sm">
             {Object.entries(sections).map(([id, section]) => (
               <li key={id}>
                 <a
                   href={`#${id}`}
-                  className="block rounded-md px-3 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="-ml-px block border-l border-transparent px-3 py-1.5 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
                 >
                   {section.nav}
                 </a>
@@ -174,7 +166,7 @@ export function GuidePage() {
           </ul>
         </nav>
 
-        <main className="flex min-w-0 flex-col gap-12">
+        <main className="flex min-w-0 flex-col gap-12 [&>section:first-child]:border-t-0 [&>section:first-child]:pt-0">
           <Section
             id="urgente"
             icon={<ListChecksIcon />}
@@ -220,25 +212,28 @@ export function GuidePage() {
             icon={<BookOpenIcon />}
             lead={`Son ${courseList.length}. Tutoría es el tablón del ciclo: no se entrega nada, pero ahí está la información oficial.`}
           >
-            <div className="grid gap-3 sm:grid-cols-2">
+            <ul className="flex flex-col divide-y rounded-lg border bg-card">
               {courseList.map(([code, course]) => (
-                <ExternalLink
-                  key={code}
-                  href={course.href}
-                  className="group flex flex-col gap-2 rounded-xl border bg-card p-4 shadow-sm transition-[border-color,transform] hover:border-primary/50 active:scale-[0.99]"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <Badge variant="secondary" className="font-mono">
+                <li key={code}>
+                  <ExternalLink
+                    href={course.href}
+                    className="group flex gap-4 p-4 transition-colors hover:bg-muted/50"
+                  >
+                    <span className="w-12 shrink-0 pt-0.5 font-mono text-xs text-muted-foreground">
                       {code}
-                    </Badge>
-                    <ExternalLinkIcon className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
-                  </div>
-                  <h3 className="font-semibold">{course.name}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{course.summary}</p>
-                  <p className="mt-auto text-xs font-medium text-primary">{course.structure}</p>
-                </ExternalLink>
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-1">
+                      <span className="font-medium group-hover:text-primary">{course.name}</span>
+                      <span className="text-sm leading-relaxed text-muted-foreground">
+                        {course.summary}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{course.structure}</span>
+                    </span>
+                    <ExternalLinkIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+                  </ExternalLink>
+                </li>
               ))}
-            </div>
+            </ul>
           </Section>
 
           <Section
@@ -374,16 +369,7 @@ export function GuidePage() {
             icon={<GraduationCapIcon />}
             lead="La nota sale de las actividades online y de un examen presencial obligatorio en mayo. Cada asignatura fija sus porcentajes en sus Normes de funcionament."
           >
-            <div className="grid gap-3 sm:grid-cols-3">
-              {grading.map((part) => (
-                <Tile
-                  key={part.label}
-                  title={<span className="text-3xl text-primary tabular-nums">{part.value}</span>}
-                >
-                  {part.label}
-                </Tile>
-              ))}
-            </div>
+            <StatStrip stats={grading} />
             <p className="text-sm text-muted-foreground">
               Ejemplo de IPO-2. Hace falta un 5 de media en lo online para poder presentarse al
               examen.
@@ -420,7 +406,7 @@ export function GuidePage() {
             icon={<LanguagesIcon />}
             lead="Los menús del campus están en castellano, pero el contenido de las asignaturas está en catalán, y el de Alemán en alemán."
           >
-            <dl className="grid gap-x-6 rounded-xl border bg-card p-4 sm:grid-cols-2">
+            <dl className="grid gap-x-6 rounded-lg border bg-card px-4 py-2 sm:grid-cols-2">
               {glossary.map(([term, meaning]) => (
                 <div
                   key={term}
@@ -446,7 +432,7 @@ export function GuidePage() {
                     key={item.title}
                     title={
                       <span className="flex flex-col gap-2">
-                        <Icon className="size-5 text-primary" />
+                        <Icon className="size-4 text-muted-foreground" />
                         {item.title}
                       </span>
                     }

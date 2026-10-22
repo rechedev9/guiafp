@@ -92,7 +92,7 @@ export function AnnotatedShot({ shot }: { shot: Shot }) {
   const [active, setActive] = useState<number | null>(null);
 
   return (
-    <figure className="overflow-hidden rounded-xl border bg-card shadow-sm">
+    <figure className="overflow-hidden rounded-lg border bg-card">
       <Dialog onOpenChange={() => setActive(null)}>
         <DialogTrigger
           className="group relative block w-full cursor-zoom-in border-b"

@@ -1,6 +1,7 @@
 import { cn } from 'cn';
 import { ArrowRightIcon, CheckIcon, XIcon } from 'lucide-react';
 import { useEffect } from 'react';
+import { Kbd } from '@/components/kbd';
 import { Button } from '@/components/ui/button';
 import type { StudyQuiz } from '@/content/study';
 import { hasModifier, onControl, shuffle } from '@/lib/study';
@@ -44,14 +45,11 @@ export function QuestionCard({
   });
 
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-4 rounded-2xl border bg-card p-6 shadow-sm duration-200 animate-in fade-in motion-reduce:animate-none sm:p-8',
-        chosen !== null && !correct && 'animate-shake',
-      )}
-    >
-      {tag && <span className="text-xs font-medium text-muted-foreground">{tag}</span>}
-      <p className="text-lg font-semibold text-balance">{item.q}</p>
+    <div className="flex flex-col gap-5 rounded-lg border bg-card p-5 duration-200 animate-in fade-in motion-reduce:animate-none sm:p-7">
+      <div className="flex flex-col gap-2">
+        {tag && <span className="text-xs font-medium text-muted-foreground">{tag}</span>}
+        <p className="text-lg leading-snug font-medium text-balance sm:text-xl">{item.q}</p>
+      </div>
       <div className="flex flex-col gap-2">
         {options.map((option, i) => {
           const isRight = option === item.right;
@@ -63,42 +61,40 @@ export function QuestionCard({
               disabled={chosen !== null}
               onClick={() => onChoose(option)}
               className={cn(
-                'pressable flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-[transform,border-color,background-color,opacity] duration-200',
-                chosen === null &&
-                  'hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5',
-                chosen !== null && isRight && 'scale-[1.02] border-emerald-500 bg-emerald-500/10',
-                picked && !isRight && 'border-destructive bg-destructive/10',
-                chosen !== null && !isRight && !picked && 'opacity-50',
+                'flex min-h-12 items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-colors duration-150',
+                chosen === null && 'hover:border-primary/40 hover:bg-accent',
+                chosen !== null && isRight && 'border-success/60 bg-success/10',
+                picked && !isRight && 'border-destructive/60 bg-destructive/10',
+                chosen !== null && !isRight && !picked && 'text-muted-foreground',
               )}
             >
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 text-xs font-bold">
-                {chosen !== null && isRight ? (
-                  <CheckIcon className="size-4 text-emerald-600" />
-                ) : picked ? (
-                  <XIcon className="size-4 text-destructive" />
-                ) : (
-                  i + 1
-                )}
-              </span>
+              {chosen !== null && isRight ? (
+                <CheckIcon className="size-5 shrink-0 text-success" />
+              ) : picked ? (
+                <XIcon className="size-5 shrink-0 text-destructive" />
+              ) : (
+                <Kbd className="h-5 w-5">{i + 1}</Kbd>
+              )}
               {option}
             </button>
           );
         })}
       </div>
       {chosen !== null && (
-        <div className="flex flex-col gap-3 border-t pt-4 duration-200 animate-in fade-in motion-reduce:animate-none">
+        <div className="flex flex-col gap-4 border-t pt-4 duration-200 animate-in fade-in motion-reduce:animate-none">
           <p className="text-sm leading-relaxed">
-            <strong
-              className={correct ? 'text-emerald-700 dark:text-emerald-400' : 'text-destructive'}
-            >
-              {correct ? '¡Correcto! ' : timedOut ? '¡Se acabó el tiempo! ' : 'No es esa. '}
+            <strong className={correct ? 'text-success' : 'text-destructive'}>
+              {correct ? 'Correcto. ' : timedOut ? 'Se acabó el tiempo. ' : 'Incorrecto. '}
             </strong>
             {item.why}
           </p>
-          <Button onClick={onNext} className="self-start">
-            {nextLabel}
-            <ArrowRightIcon />
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button size="lg" onClick={onNext}>
+              {nextLabel}
+              <ArrowRightIcon />
+            </Button>
+            <Kbd className="hidden sm:inline-flex">Intro</Kbd>
+          </div>
         </div>
       )}
     </div>

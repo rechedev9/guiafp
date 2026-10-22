@@ -46,14 +46,14 @@ export function TaskList({ title, tasks }: TaskListProps) {
   const count = tasks.filter((task) => done[task.id]).length;
 
   return (
-    <section className="rounded-xl border bg-card shadow-sm">
+    <section className="overflow-hidden rounded-lg border bg-card">
       <header className="flex items-center justify-between gap-4 border-b p-4">
         <h3 className="font-semibold">{title}</h3>
         <span className="text-sm whitespace-nowrap text-muted-foreground tabular-nums">
           {count} de {tasks.length}
         </span>
       </header>
-      <ProgressBar value={count} max={tasks.length} label={title} className="h-1 rounded-none" />
+      <ProgressBar value={count} max={tasks.length} label={title} className="rounded-none" />
       <ul className="divide-y">
         {tasks.map((task) => (
           <li key={task.id} className="flex items-start gap-3 p-4">

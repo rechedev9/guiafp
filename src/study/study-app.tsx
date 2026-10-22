@@ -1,46 +1,53 @@
-import { ArrowLeftIcon } from 'lucide-react';
+import { ChevronRightIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { allCards, findSubject } from '@/content/study';
 import { type Route, studyHref } from '@/lib/route';
 import { Challenge } from '@/study/challenge';
 import { Flashcards } from '@/study/flashcards';
-import { PlayerHud } from '@/study/player-hud';
 import { StudyHome } from '@/study/study-home';
+import { Toasts } from '@/study/study-status';
 import { SubjectPage } from '@/study/subject-page';
 
-function BackLink() {
+type SessionPageProps = { title: string; lead: string; children: ReactNode };
+
+function SessionPage({ title, lead, children }: SessionPageProps) {
   return (
-    <a
-      href={studyHref()}
-      className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-    >
-      <ArrowLeftIcon className="size-4" />
-      Todas las asignaturas
-    </a>
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <header className="flex flex-col gap-2">
+        <nav aria-label="Ruta" className="flex items-center gap-1 text-sm text-muted-foreground">
+          <a href={studyHref()} className="transition-colors hover:text-foreground">
+            Estudiar
+          </a>
+          <ChevronRightIcon className="size-3.5" />
+          <span className="text-foreground">{title}</span>
+        </nav>
+        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <p className="text-sm text-muted-foreground">{lead}</p>
+      </header>
+      {children}
+    </div>
   );
 }
 
 function StudyRoute({ route }: { route: Route }) {
   if (route.page === 'review') {
     return (
-      <div className="flex flex-col gap-6">
-        <BackLink />
-        <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Repaso mezclado</h1>
-          <p className="max-w-prose text-muted-foreground">
-            Las tarjetas que tocan hoy de todas las asignaturas, mezcladas. Cambiar de tema cuesta
-            un poco más, pero se recuerda mejor.
-          </p>
-        </header>
+      <SessionPage
+        title="Repaso mezclado"
+        lead="Las tarjetas que tocan hoy de todas las asignaturas, mezcladas. Cambiar de tema cuesta un poco más, pero se recuerda mejor."
+      >
         <Flashcards cards={allCards()} mixed />
-      </div>
+      </SessionPage>
     );
   }
   if (route.page === 'challenge') {
     return (
-      <div className="flex flex-col gap-6">
-        <BackLink />
+      <SessionPage
+        title="Contrarreloj"
+        lead="Preguntas de test de todas las asignaturas con 20 segundos para cada una."
+      >
         <Challenge />
-      </div>
+      </SessionPage>
     );
   }
   if (route.page === 'subject') {
@@ -53,10 +60,10 @@ function StudyRoute({ route }: { route: Route }) {
 export function StudyApp({ route }: { route: Route }) {
   return (
     <>
-      <PlayerHud />
       <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
         <StudyRoute route={route} />
       </main>
+      <Toasts />
     </>
   );
 }

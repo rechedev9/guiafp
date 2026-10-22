@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import type { Sequence } from '@/content/study/types';
 import { shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
-import { Stars } from '@/study/celebration';
 
 type Item = { label: string; detail: string; position: number };
 
@@ -47,7 +46,7 @@ function SequenceBoard({ sequence, recordKey }: SequenceGameProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border bg-card p-4 sm:p-6">
+    <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 sm:p-5">
       <div>
         <h3 className="font-semibold">{sequence.title}</h3>
         <p className="text-sm text-muted-foreground">{sequence.instruction}</p>
@@ -59,14 +58,12 @@ function SequenceBoard({ sequence, recordKey }: SequenceGameProps) {
             <li
               key={item.label}
               className={cn(
-                'flex items-center gap-2 rounded-xl border bg-background p-2 pl-3 transition-colors duration-200',
-                checked && ok && 'border-emerald-500/60 bg-emerald-500/10',
+                'flex items-center gap-2 rounded-md border bg-background p-1.5 pl-3 transition-colors duration-150',
+                checked && ok && 'border-success/50 bg-success/10',
                 checked && !ok && 'border-destructive/50 bg-destructive/5',
               )}
             >
-              <span className="w-5 shrink-0 text-sm font-semibold text-muted-foreground tabular-nums">
-                {i + 1}
-              </span>
+              <span className="w-5 shrink-0 font-mono text-xs text-muted-foreground">{i + 1}</span>
               <div className="min-w-0 flex-1">
                 <p className="leading-snug font-medium">{item.label}</p>
                 {solved && item.detail && (
@@ -75,7 +72,7 @@ function SequenceBoard({ sequence, recordKey }: SequenceGameProps) {
               </div>
               {checked &&
                 (ok ? (
-                  <CheckIcon className="size-4 shrink-0 text-emerald-600" />
+                  <CheckIcon className="size-4 shrink-0 text-success" />
                 ) : (
                   <XIcon className="size-4 shrink-0 text-destructive" />
                 ))}
@@ -106,9 +103,8 @@ function SequenceBoard({ sequence, recordKey }: SequenceGameProps) {
       <div className="flex flex-wrap items-center gap-3">
         {solved ? (
           <>
-            <Stars count={attempts === 1 ? 3 : attempts === 2 ? 2 : 1} className="[&_svg]:size-6" />
-            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-              {attempts === 1 ? '¡Perfecto a la primera!' : `Conseguido en ${attempts} intentos.`}
+            <p className="text-sm font-medium text-success">
+              {attempts === 1 ? 'Correcto a la primera.' : `Correcto en ${attempts} intentos.`}
             </p>
             <Button
               variant="outline"

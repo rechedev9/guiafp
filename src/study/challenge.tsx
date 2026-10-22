@@ -1,28 +1,28 @@
 import { cn } from 'cn';
-import { HeartIcon, PlayIcon, RotateCcwIcon, SwordsIcon, TrophyIcon } from 'lucide-react';
+import { RotateCcwIcon, TimerIcon } from 'lucide-react';
 import { useState } from 'react';
+import { StatStrip } from '@/components/stat-strip';
 import { Button } from '@/components/ui/button';
 import { allQuiz, findSubject, subjectSlugOf } from '@/content/study';
 import { shuffle } from '@/lib/study';
 import { useStudyStore } from '@/stores/study-store';
-import { SessionDone, useSessionXp } from '@/study/celebration';
 import { QuestionCard, toQuestions } from '@/study/question-card';
+import { SessionDone, useSessionXp } from '@/study/session-done';
 
 const LIVES = 3;
 
 const newDeck = () => toQuestions(shuffle(allQuiz()));
 const hits = (n: number) => `${n} ${n === 1 ? 'acierto' : 'aciertos'}`;
-const runStars = (run: number) => (run >= 15 ? 3 : run >= 8 ? 2 : run >= 3 ? 1 : 0);
 
-function Hearts({ lives }: { lives: number }) {
+function Misses({ count }: { count: number }) {
   return (
-    <span role="img" className="flex items-center gap-1" aria-label={`${lives} vidas`}>
+    <span className="flex items-center gap-1" aria-hidden>
       {Array.from({ length: LIVES }, (_, i) => (
-        <HeartIcon
-          key={`${i}-${i < lives}`}
+        <span
+          key={i}
           className={cn(
-            'size-6 transition-colors',
-            i < lives ? 'fill-rose-500 text-rose-500' : 'animate-shake text-muted-foreground/30',
+            'size-2 rounded-full',
+            i < count ? 'bg-destructive' : 'bg-muted-foreground/25',
           )}
         />
       ))}
@@ -44,12 +44,12 @@ export function Challenge() {
   const [bestBefore, setBestBefore] = useState(best);
   const current = deck[index];
 
-  // An empty choice means the countdown ran out, which costs a life like a wrong answer.
+  // An empty choice means the countdown ran out, which counts as a miss.
   function choose(option: string) {
     if (!current || chosen !== null) return;
     const correct = option === current.item.right;
     setChosen(option);
-    // Losing the last life ends the run here, so leaving before the results still saves it.
+    // The third miss ends the run here, so leaving before the results still saves it.
     const finish = !correct && lives === 1 ? { perfect: false, run } : undefined;
     record({ id: current.item.id, correct, finish });
     if (correct) setRun((n) => n + 1);
@@ -75,27 +75,24 @@ export function Challenge() {
 
   if (!playing) {
     return (
-      <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-2xl border bg-linear-to-br from-rose-500/10 via-card to-amber-500/10 p-8 text-center">
-        <span className="flex size-16 items-center justify-center rounded-2xl bg-linear-to-br from-rose-500 to-orange-500 text-white shadow-lg shadow-rose-500/30">
-          <SwordsIcon className="size-8" />
-        </span>
-        <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-semibold tracking-tight">Desafío de supervivencia</h2>
-          <p className="max-w-md text-muted-foreground">
-            Preguntas de todas las asignaturas mezcladas. Tienes 3 vidas y 20 segundos por pregunta.
-            ¿Hasta dónde llegas?
-          </p>
-        </div>
-        <Hearts lives={LIVES} />
-        {best > 0 && (
-          <p className="flex items-center gap-1.5 text-sm font-medium tabular-nums">
-            <TrophyIcon className="size-4 text-amber-500" />
-            Tu récord: {hits(best)}
-          </p>
-        )}
-        <Button size="lg" onClick={start}>
-          <PlayIcon />
-          Empezar
+      <div className="flex flex-col gap-5 rounded-lg border bg-card p-5 sm:p-7">
+        <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
+          <li>
+            Preguntas de test de las {deck.length} que hay en todas las asignaturas, mezcladas.
+          </li>
+          <li>20 segundos por pregunta. Si se acaba el tiempo, cuenta como fallo.</li>
+          <li>La ronda termina al tercer fallo. Las falladas salen antes en el Test.</li>
+        </ul>
+        <StatStrip
+          className="max-w-md"
+          stats={[
+            { label: 'Tu récord', value: best > 0 ? hits(best) : 'Sin marca' },
+            { label: 'Fallos permitidos', value: LIVES - 1 },
+          ]}
+        />
+        <Button size="lg" className="self-start" onClick={start}>
+          <TimerIcon />
+          Empezar ronda
         </Button>
       </div>
     );
@@ -105,23 +102,20 @@ export function Challenge() {
     const isRecord = run > bestBefore;
     return (
       <SessionDone
-        title={isRecord ? `¡Nuevo récord! ${hits(run)}` : hits(run)}
         xp={session.gained}
-        stars={runStars(run)}
-        celebrate={isRecord || run >= 8}
+        title={isRecord ? `Nuevo récord: ${hits(run)}` : 'Ronda terminada'}
+        stats={[
+          { label: 'Aciertos', value: run },
+          { label: 'Récord', value: Math.max(run, bestBefore) },
+        ]}
         actions={
           <Button onClick={start}>
             <RotateCcwIcon />
-            Otra partida
+            Otra ronda
           </Button>
         }
       >
-        <p className="max-w-sm text-sm text-muted-foreground">
-          {isRecord
-            ? 'Has superado tu mejor marca.'
-            : best > 0
-              ? `Tu récord está en ${hits(best)}.`
-              : 'A la próxima cae el primero.'}{' '}
+        <p className="max-w-prose text-sm text-muted-foreground">
           Las preguntas falladas saldrán antes en el Test de cada asignatura.
         </p>
       </SessionDone>
@@ -129,20 +123,26 @@ export function Challenge() {
   }
 
   const subject = findSubject(subjectSlugOf(current.item.id));
+  const misses = LIVES - lives;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <Hearts lives={lives} />
-        <span className="text-lg font-bold tabular-nums">
-          {run} <span className="text-sm font-normal text-muted-foreground">aciertos</span>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <span className="tabular-nums">
+          Aciertos <span className="font-medium text-foreground">{run}</span>
         </span>
-        <span className="flex items-center gap-1 text-sm text-muted-foreground tabular-nums">
-          <TrophyIcon className="size-4 text-amber-500" />
-          {Math.max(bestBefore, run)}
+        <span
+          role="img"
+          aria-label={`${misses} de ${LIVES} fallos`}
+          className="flex items-center gap-2"
+        >
+          Fallos <Misses count={misses} />
+        </span>
+        <span className="tabular-nums">
+          Récord <span className="font-medium text-foreground">{Math.max(bestBefore, run)}</span>
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted" aria-hidden>
+      <div className="h-1 overflow-hidden rounded-full bg-muted" aria-hidden>
         <div
           key={current.item.id}
           onAnimationEnd={() => choose('')}

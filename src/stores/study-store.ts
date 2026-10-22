@@ -9,7 +9,6 @@ import {
   emptyDay,
   emptyTotals,
   levelOf,
-  multiplier,
   type Progress,
   QUEST_BONUS,
   quests,
@@ -48,7 +47,7 @@ const cardXp: Record<Grade, number> = { again: 2, hard: 6, good: 10, easy: 12 };
 
 type Finish = { perfect: boolean; run?: number };
 
-// correct: true grows the combo and multiplies the XP, false breaks it, undefined leaves it.
+// correct: true grows the combo, false breaks it, undefined leaves it.
 type Gain = { xp: number; correct?: boolean; cards?: number; right?: number; finish?: Finish };
 
 type Saved = {
@@ -125,9 +124,7 @@ function reward({ state, gain, patch }: RewardOptions): Saved {
   const key = String(today());
   const { finish } = gain;
   const combo = gain.correct === undefined ? feed.combo : gain.correct ? feed.combo + 1 : 0;
-  const earned =
-    (gain.correct ? gain.xp * multiplier(combo) : gain.xp) +
-    (finish ? (finish.perfect ? 50 : 25) : 0);
+  const earned = gain.xp + (finish ? (finish.perfect ? 50 : 25) : 0);
   const before = state.days[key] ?? emptyDay;
   const day = {
     xp: before.xp + earned,
@@ -140,7 +137,11 @@ function reward({ state, gain, patch }: RewardOptions): Saved {
   for (const quest of quests) {
     if (quest.value(before) >= quest.goal || quest.value(day) < quest.goal) continue;
     day.xp += QUEST_BONUS;
-    add({ kind: 'quest', title: 'Misión cumplida', detail: `${quest.title}: +${QUEST_BONUS} XP` });
+    add({
+      kind: 'quest',
+      title: 'Objetivo cumplido',
+      detail: `${quest.title}: +${QUEST_BONUS} XP`,
+    });
   }
   const gained = day.xp - before.xp;
   const next: Saved = {
@@ -160,7 +161,11 @@ function reward({ state, gain, patch }: RewardOptions): Saved {
   const level = levelOf(next.xp);
   const levelUp = level.level > levelOf(state.xp).level;
   if (levelUp) {
-    add({ kind: 'level', title: `¡Nivel ${level.level}!`, detail: `Ahora eres ${level.rank}` });
+    add({
+      kind: 'level',
+      title: `Nivel ${level.level}`,
+      detail: `Has llegado al nivel ${level.level}.`,
+    });
   }
   const progress = progressOf(next);
   const badges = { ...state.badges };
@@ -174,7 +179,6 @@ function reward({ state, gain, patch }: RewardOptions): Saved {
   if (sound && !state.muted) play(sound, combo);
   useGameFeed.setState({
     combo,
-    lastGain: gained > 0 ? { id: ++eventId, xp: gained } : feed.lastGain,
     toasts: [...feed.toasts, ...toasts].slice(-3),
   });
   return { ...next, badges };
