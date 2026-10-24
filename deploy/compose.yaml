@@ -1,4 +1,4 @@
-# Static guide for guiafp.rechedev.cloud. The shared edge Caddy proxies to this port.
+# guiafp.rechedev.cloud: the static guide and the progress API. The shared edge Caddy proxies to this port.
 # Mounts the parent folder: a bind mount of site/ itself would keep pointing at the replaced folder.
 name: guiafp
 
@@ -6,8 +6,26 @@ services:
   web:
     image: caddy:2-alpine
     restart: unless-stopped
-    command: caddy file-server --root /data/site --listen :8080
+    command: caddy run --config /data/Caddyfile --adapter caddyfile
     ports:
       - '127.0.0.1:8130:8080'
     volumes:
       - ./:/data:ro
+
+  # Keeps the study progress in state/, with a daily copy in state/backups/.
+  api:
+    image: oven/bun:1-alpine
+    restart: unless-stopped
+    user: '1000:1000'
+    working_dir: /app
+    command: ['bun', 'server.js']
+    environment:
+      STATE_DIR: /state
+    volumes:
+      - ./api:/app:ro
+      - ./state:/state
+    mem_limit: 256m
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '3130']
+      interval: 30s
+      timeout: 3s

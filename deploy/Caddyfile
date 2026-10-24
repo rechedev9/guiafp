@@ -1,0 +1,19 @@
+# Serves the static build and passes /api to the progress API. TLS and the domain live in the edge Caddy.
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	handle /api/* {
+		request_body {
+			max_size 4MB
+		}
+		reverse_proxy api:3130
+	}
+
+	handle {
+		root * /data/site
+		file_server
+	}
+}

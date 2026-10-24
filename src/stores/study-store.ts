@@ -1,20 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { StudyData } from '../../server/schema';
 import { subjectSlugOf, subjects } from '@/content/study';
 import { today } from '@/lib/dates';
 import {
   achievements,
   DAILY_GOAL,
-  type DayLog,
   emptyDay,
   emptyTotals,
   levelOf,
   type Progress,
   QUEST_BONUS,
   quests,
-  type Totals,
 } from '@/lib/game';
 import { play, type Sound } from '@/lib/sfx';
+import { onRemoteData, syncedStorage } from '@/lib/sync';
 import { type Toast, useGameFeed } from '@/stores/game-feed';
 
 export type Grade = 'again' | 'hard' | 'good' | 'easy';
@@ -50,17 +50,8 @@ type Finish = { perfect: boolean; run?: number };
 // correct: true grows the combo, false breaks it, undefined leaves it.
 type Gain = { xp: number; correct?: boolean; cards?: number; right?: number; finish?: Finish };
 
-type Saved = {
-  cards: Record<string, CardState>;
-  answers: Record<string, { right: number; wrong: number }>;
-  bestTimes: Record<string, number>;
-  activity: Record<string, number>;
-  xp: number;
-  days: Record<string, DayLog>;
-  totals: Totals;
-  badges: Record<string, number>;
-  muted: boolean;
-};
+// The server validates the saved progress, so its schema defines the shape.
+type Saved = StudyData;
 
 type StudyState = Saved & {
   grade: (review: { id: string; grade: Grade; finish?: Finish }) => void;
@@ -225,9 +216,11 @@ export const useStudyStore = create<StudyState>()(
         }),
       toggleMute: () => set((state) => ({ muted: !state.muted })),
     }),
-    { name: 'guiafp-study' },
+    { name: 'guiafp-study', storage: syncedStorage() },
   ),
 );
+
+onRemoteData('study', () => void useStudyStore.persist.rehydrate());
 
 export type DeckStats = { total: number; fresh: number; due: number; mastered: number };
 

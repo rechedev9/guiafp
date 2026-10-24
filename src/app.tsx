@@ -1,6 +1,7 @@
 import { cn } from 'cn';
 import { GraduationCapIcon } from 'lucide-react';
 import { lazy, Suspense, useEffect } from 'react';
+import { SyncIndicator } from '@/components/sync-indicator';
 import { GuidePage } from '@/guide-page';
 import { scrollTarget, studyHref, useRoute } from '@/lib/route';
 
@@ -65,7 +66,8 @@ export function App() {
               </span>
             </a>
           ))}
-          <div className="ml-auto flex items-center">
+          <div className="ml-auto flex items-center gap-2">
+            <SyncIndicator />
             {studying && (
               <Suspense fallback={null}>
                 <StudyStatus />

@@ -6,4 +6,6 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()],
   resolve: { tsconfigPaths: true },
+  // `bun run api` serves the progress API in dev, as Caddy does in production.
+  server: { proxy: { '/api': 'http://localhost:3130' } },
 });
