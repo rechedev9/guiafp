@@ -79,6 +79,29 @@ export const pi: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'zD2w_35OYjM',
+          title: 'El Proyecto Intermodular',
+          channel: 'Enrique Tortajada González',
+          lang: 'es',
+          note: 'Qué es un proyecto intermodular y sus fases. Los plazos y porcentajes del vídeo son de otro centro: los tuyos están en el Temario.',
+        },
+        {
+          id: 'npN6SPcDyIs',
+          title: 'Explicación del canvas para crear producto en la innovación turística',
+          channel: 'Jimmy Pons',
+          lang: 'es',
+          note: 'Cómo convertir un recurso del territorio en un producto turístico para un cliente concreto.',
+        },
+        {
+          id: 'E6StRLc38VU',
+          title: 'Cómo PRESENTAR tu PROYECTO en PÚBLICO | EduCaixa',
+          channel: 'EduCaixaTV',
+          lang: 'es',
+          note: 'Cinco pasos para presentar un proyecto con claridad, útiles para el vídeo de la entrega final.',
+        },
+      ],
       selfCheck: [
         [
           '¿Qué pasa si no entregas el Lliurament 3 porque no tiene nota?',

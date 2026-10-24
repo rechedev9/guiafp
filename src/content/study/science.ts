@@ -25,6 +25,11 @@ export const principles = [
     here: 'Escribe tu respuesta antes de girar la tarjeta y repite los fallos al final.',
   },
   {
+    title: 'Palabras e imágenes',
+    text: 'Lo que lees y además ves explicado con imágenes y voz se guarda por dos vías, y es más fácil de recuperar después.',
+    here: 'Cada unidad tiene vídeos de YouTube de refuerzo en la pestaña Vídeos.',
+  },
+  {
     title: 'Sesiones cortas y dormir',
     text: 'Varias sesiones de 20 a 30 minutos rinden más que una maratón, y el sueño consolida lo estudiado.',
     here: 'Mejor un repaso al día que tres horas el domingo.',
@@ -35,7 +40,7 @@ export const weeklyPlan = [
   { when: 'Cada día, 15 minutos', what: 'Repaso mezclado: solo las tarjetas que tocan hoy.' },
   {
     when: 'Al abrir un bloque nuevo',
-    what: 'Lee el Temario de la unidad y contesta sus preguntas en voz alta.',
+    what: 'Lee el Temario de la unidad, mira sus vídeos y contesta sus preguntas en voz alta.',
   },
   { when: '2 o 3 días después', what: 'Test de esa asignatura y repite los fallos.' },
   {

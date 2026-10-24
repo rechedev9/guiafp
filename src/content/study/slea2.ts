@@ -100,6 +100,50 @@ export const slea2: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: '1cc2HsVTYY4',
+          title: 'Las preposiciones de lugar en aleman."Wechselpräpositionen".',
+          channel: 'Aleman con Tobias',
+          lang: 'es',
+          note: 'Las Wechselpräpositionen: acusativo con wohin (movimiento) y dativo con wo (lugar).',
+        },
+        {
+          id: 'yyRQDquflDg',
+          title: 'Pronombres personales Nominativ Akkusativ Dativ | Personalpronomen en ALEMÁN',
+          channel: 'Alemán Explicado',
+          lang: 'es',
+          note: 'La tabla de pronombres en nominativo, acusativo y dativo con frases de ejemplo.',
+        },
+        {
+          id: 'ZQ78eiEIadE',
+          title: 'Learn German A1 | gerne, lieber, am liebsten || Deutsch Für Euch 44',
+          channel: 'Deutsch für Euch',
+          lang: 'en',
+          note: 'Cómo expresar gustos y preferencias con gern, lieber y am liebsten.',
+        },
+        {
+          id: 'brXIVfy2uJE',
+          title: 'Las conjunciones 💚 und, sondern, aber, denn & oder',
+          channel: 'Aprende a Hablar! alemán',
+          lang: 'es',
+          note: 'Las conjunciones ADUSO y por qué no cambian el orden de la frase.',
+        },
+        {
+          id: 'OFSHdj_2FQA',
+          title: 'Ordering in a Restaurant in Slow German (for German Beginners)',
+          channel: 'Easy German',
+          lang: 'de',
+          note: 'Un diálogo lento en un restaurante: pedir, preguntar por la carta y pagar.',
+        },
+        {
+          id: '_dddL1ddmXQ',
+          title: 'At the Hotel in Slow German | Super Easy German 283',
+          channel: 'Easy German',
+          lang: 'de',
+          note: 'Un diálogo lento en un hotel con el vocabulario de la habitación y la recepción.',
+        },
+      ],
       selfCheck: [
         [
           '¿Por qué se dice "Ich gehe ins Museum" pero "Ich bin im Museum"?',

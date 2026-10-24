@@ -72,6 +72,37 @@ export const hcib: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'XlPE2eIkwA8',
+          title: 'Origen y Significado del Nombre de las ISLAS BALEARES en 2 minutos',
+          channel: 'Ventana Curiosa',
+          lang: 'es',
+          note: 'Por qué "Balears" viene del púnico ba\'lé yaroh, los que lanzan piedras, y no del griego.',
+        },
+        {
+          id: 'eV97EUvAs3g',
+          title: 'Los FRANCOTIRADORES de las LEGIONES ROMANAS | Los Honderos Baleares',
+          channel: 'Historia ex Hispania',
+          lang: 'es',
+          note: 'Los honderos baleares como mercenarios de élite de Cartago y de Roma.',
+        },
+        {
+          id: 'LvNqpvJ8kMA',
+          title: 'La increïble història de les Illes Balears - 5. Els reis de Mallorca',
+          channel: 'Aleix Font',
+          lang: 'ca',
+          note: 'Capítulo de la serie de IB3 sobre el Reino de Mallorca, de Jaume I a su final en 1349.',
+        },
+        {
+          id: 'PSWrOMp2iyc',
+          title:
+            "Les Illes Balears commemoren l'aprovació de l'Estatut d'Autonomia de l'1 de març del 1983",
+          channel: 'IB3',
+          lang: 'ca',
+          note: 'El Estatuto de Autonomía de 1983, que crea las primeras instituciones comunes.',
+        },
+      ],
       selfCheck: [
         [
           '¿Qué significa "Balears" según la hipótesis aceptada hoy?',
@@ -292,6 +323,37 @@ export const hcib: Subject = {
             'Paradoja: tras la caída de Cartago (146 aC) Ibiza vive su **máximo esplendor** en el siglo II aC y es **ciudad federada** de Roma.',
             'En Mallorca y Menorca, el fin del mercenariado deja población sin salida; aparece la **piratería**, la excusa de Roma para conquistar las islas en el **123 aC** con **Quinto Cecilio Metelo**.',
           ],
+        },
+      ],
+      videos: [
+        {
+          id: 'lFKie-fbvhc',
+          title: 'La Increïble Història de les Illes Balears - Els primers pobladors',
+          channel: 'Història en català',
+          lang: 'ca',
+          note: 'Capítulo de la serie de IB3 sobre los primeros pobladores y la Prehistoria de las islas.',
+        },
+        {
+          id: 'joYLUk4m2Cc',
+          title: 'CULTURA TALAYÓTICA | La Prehistoria en las Islas Baleares',
+          channel: 'Fundación Palarq',
+          lang: 'es',
+          note: 'Resumen de la cultura talayótica de Mallorca y Menorca: talayots, taulas y navetas.',
+        },
+        {
+          id: 'ZJuWEVeLYS0',
+          title:
+            'Menorca a tiro de piedra: Documental de la Menorca talayótica y del hondero balear',
+          channel: 'destmenorca',
+          lang: 'es',
+          note: 'Recorrido por los yacimientos talayóticos de Menorca y los honderos al servicio de Cartago y Roma.',
+        },
+        {
+          id: 'AVogX8EGRas',
+          title: 'La Increïble Història de les Illes Balears - Púnics i Romans a les Illes Balears',
+          channel: 'Història en català',
+          lang: 'ca',
+          note: 'Capítulo de la serie de IB3 sobre la Ibiza fenicio-púnica y la llegada de Roma.',
         },
       ],
       selfCheck: [

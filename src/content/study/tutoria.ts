@@ -70,6 +70,37 @@ export const tutoria: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'ROMAST_QNbM',
+          title: "Com funciona l'aula de tutoria?",
+          channel: 'IEDIB',
+          lang: 'ca',
+          note: 'Vídeo oficial del IEDIB: dónde están los calendarios y los horarios de exámenes.',
+        },
+        {
+          id: 'Cn3exi9LZ9U',
+          title: 'Com funciona una aula de matèria',
+          channel: 'IEDIB',
+          lang: 'ca',
+          note: 'Vídeo oficial del IEDIB: cómo es el aula de cada asignatura y dónde se hacen las entregas.',
+        },
+        {
+          id: 'QD-zwXc3dtQ',
+          title: 'Cómo aplicar el Active Recall? La mejor técnica de estudio, según la ciencia',
+          channel: 'Adrià Solà Pastor',
+          lang: 'es',
+          note: 'La práctica de recuperación, la técnica en la que se basan las Tarjetas y el Test.',
+        },
+        {
+          id: 'fp_YbxuJJkQ',
+          title:
+            'Cómo aplicar la Repetición Espaciada? La mejor forma de estudiar, según la ciencia',
+          channel: 'Adrià Solà Pastor',
+          lang: 'es',
+          note: 'Cómo repartir el repaso hasta los exámenes presenciales de mayo.',
+        },
+      ],
       selfCheck: [
         [
           '¿Qué dos exámenes caen el mismo día?',

@@ -117,6 +117,44 @@ export const ipo2: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'toYqGCBi1gM',
+          title: 'Masterclass: Elabora un CV de alto impacto | OBS Business School',
+          channel: 'OBS Business School',
+          lang: 'es',
+          note: 'Tipos de CV, cómo funcionan los filtros ATS y cómo usar palabras clave.',
+        },
+        {
+          id: '0Y1WzHGVBVs',
+          title:
+            'Cómo preparar y hacer bien una entrevista de trabajo | Cómo responder | Preguntas habituales, etc',
+          channel: 'Humanos como recurso',
+          lang: 'es',
+          note: 'Una profesional de RRHH explica cómo preparar la entrevista, sus fases y las preguntas habituales.',
+        },
+        {
+          id: 'oAUUFkzNfYo',
+          title: 'El método STAR explicado por una ex-trabajadora de Amazon',
+          channel: 'Andrea Pilan',
+          lang: 'es',
+          note: 'El método STAR (Situación, Tarea, Acción, Resultado) con ejemplos de respuestas.',
+        },
+        {
+          id: 'bLZF3UsEwjI',
+          title: 'Qué es el MERCADO LABORAL OCULTO y como acceder para conseguir trabajo',
+          channel: 'Fernando Segarra',
+          lang: 'es',
+          note: 'Por qué la mayoría de vacantes no se publica y cómo llegar a ellas con contactos y autocandidatura.',
+        },
+        {
+          id: 'O542nvq-FQI',
+          title: 'La Marca Personal',
+          channel: 'Multicanal de Orientación para el Empleo Cruz Roja',
+          lang: 'es',
+          note: 'Qué es la marca personal y por qué tus competencias te diferencian al buscar empleo.',
+        },
+      ],
       selfCheck: [
         [
           '¿Qué diferencia hay entre InfoJobs e Indeed?',

@@ -37,5 +37,13 @@
       }
     ]
   },
+  "overrides": [
+    {
+      "files": ["src/study/video-list.tsx"],
+      "rules": {
+        "react/iframe-missing-sandbox": "off"
+      }
+    }
+  ],
   "ignorePatterns": ["dist", "src/components/ui"]
 }

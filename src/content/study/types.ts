@@ -13,12 +13,24 @@ export type Sequence = {
   items: [label: string, detail: string][];
 };
 
+// start is in seconds. note says which part of the unit the video reinforces.
+export type Video = {
+  id: string;
+  title: string;
+  channel: string;
+  lang: 'es' | 'ca' | 'en' | 'de';
+  note: string;
+  start?: number;
+};
+
 export type Unit = {
   id: string;
   title: string;
   source: string;
   summary: string;
   sections: Section[];
+  // Every unit needs at least one YouTube video as audiovisual reinforcement.
+  videos: [Video, ...Video[]];
   selfCheck: [question: string, answer: string][];
   cards: [front: string, back: string][];
   quiz: QuizItem[];

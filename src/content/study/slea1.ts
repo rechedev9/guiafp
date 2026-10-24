@@ -94,6 +94,44 @@ export const slea1: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'CkvC2gjQCgI',
+          title: 'PRESENTARSE en ALEMÁN 🇩🇪 | FRASES BÁSICAS A1 para hablar desde el primer día',
+          channel: 'Aleman paso a paso',
+          lang: 'es',
+          note: 'Las frases para presentarte: nombre, edad, de dónde eres, a qué te dedicas y las preguntas básicas.',
+        },
+        {
+          id: '8LoTEUTyXmw',
+          title: 'precios, horas, fechas ...en alemán / Ejercicio de hören con nativos',
+          channel: 'Alemania en Español (Ale Waldmann)',
+          lang: 'es',
+          note: 'Escucha con nativos para entender números, precios, horas y fechas.',
+        },
+        {
+          id: '6kE8lxTm4Hk',
+          title: 'Aprende a conjugar verbos en presente | Alemán A1.1 para principiantes',
+          channel: 'Alemán Explicado',
+          lang: 'es',
+          note: 'Terminaciones del presente, sein y haben, y los verbos que cambian de vocal (fahren, sprechen, lesen).',
+        },
+        {
+          id: 'A9pnciEP6j8',
+          title:
+            '🔥 La regla MÁS IMPORTANTE del alemán 🇩🇪 | El orden de las frases EXPLICADO FÁCIL',
+          channel: '100x100Aleman',
+          lang: 'es',
+          note: 'El verbo en posición 2, la inversión con heute o morgen y el orden de las W-Fragen.',
+        },
+        {
+          id: 'gPnxoLO2wk4',
+          title: 'Cómo usar MEIN DEIN SEIN | artículos posesivos en alemán | Possessivartikel',
+          channel: 'Alemán Explicado',
+          lang: 'es',
+          note: 'Los posesivos mein, dein, sein, ihr, unser y euer y cómo cambian según el género.',
+        },
+      ],
       selfCheck: [
         [
           '¿Cómo dices que vives en Mallorca y que vienes de Mallorca?',

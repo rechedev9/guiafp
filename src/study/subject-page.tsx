@@ -6,6 +6,7 @@ import {
   GraduationCapIcon,
   LayersIcon,
   ListChecksIcon,
+  MonitorPlayIcon,
   PencilLineIcon,
   PuzzleIcon,
 } from 'lucide-react';
@@ -24,9 +25,18 @@ import { MatchGame } from '@/study/match-game';
 import { Quiz } from '@/study/quiz';
 import { SequenceGame } from '@/study/sequence-game';
 import { Syllabus } from '@/study/syllabus';
+import { VideoList } from '@/study/video-list';
 
 type Mode = {
-  id: 'calendario' | 'temario' | 'tarjetas' | 'test' | 'completar' | 'emparejar' | 'ordenar';
+  id:
+    | 'calendario'
+    | 'temario'
+    | 'videos'
+    | 'tarjetas'
+    | 'test'
+    | 'completar'
+    | 'emparejar'
+    | 'ordenar';
   label: string;
   icon: ComponentType<{ className?: string }>;
   lead?: string;
@@ -35,6 +45,12 @@ type Mode = {
 const allModes: Mode[] = [
   { id: 'calendario', label: 'Calendario', icon: CalendarDaysIcon },
   { id: 'temario', label: 'Temario', icon: BookOpenIcon },
+  {
+    id: 'videos',
+    label: 'Vídeos',
+    icon: MonitorPlayIcon,
+    lead: 'El mismo temario explicado en vídeo. Míralos después de leer la unidad y antes de practicar: oír y ver lo que has leído ayuda a fijarlo.',
+  },
   {
     id: 'tarjetas',
     label: 'Tarjetas',
@@ -232,6 +248,7 @@ export function SubjectPage({ subject, mode }: SubjectPageProps) {
                 <Syllabus units={unitsOf(subject, unit)} />
               </>
             )}
+            {active.id === 'videos' && <VideoList units={unitsOf(subject, unit)} />}
             {(active.id === 'tarjetas' || active.id === 'test' || active.id === 'completar') && (
               <div className="max-w-2xl">
                 {active.id === 'tarjetas' && <Flashcards key={sessionKey} cards={cards} />}

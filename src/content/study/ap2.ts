@@ -77,6 +77,30 @@ export const ap2: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'uUMPULuwdLI',
+          title: 'How to Order Food at a Restaurant in English',
+          channel: 'Learn English with Bob the Canadian',
+          lang: 'en',
+          note: 'Formas reales de pedir en un restaurante, para el listening y las frases del cliente.',
+        },
+        {
+          id: '-oll5WNHWAk',
+          title:
+            '🔴 Cómo usar MUCH, MANY, A LOT, A LITTLE y A FEW en inglés fácilmente | Quantifiers explicados',
+          channel: 'Francisco Ochoa Inglés Fácil',
+          lang: 'es',
+          note: 'Much, many, a lot, a little y a few, y cómo distinguir contables de incontables.',
+        },
+        {
+          id: 'qo2Dsi3cLeg',
+          title: 'INVERSION para C1 Advanced FÁCIL ✏️ Use of English and Writing con ejemplos',
+          channel: 'Inglés Para Perezosos',
+          lang: 'es',
+          note: 'La inversión del registro formal tras expresiones negativas como never o not only.',
+        },
+      ],
       selfCheck: [
         [
           '¿Por qué "Would you like some wine?" usa some y no any?',
@@ -298,6 +322,31 @@ export const ap2: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'WsXEonludOI',
+          title:
+            'Cómo escribir FORMAL LETTER OF COMPLAINT B2-C1 - Estructura, frases fijas, vocabulary con ejemplo',
+          channel: 'Inglés Para Perezosos',
+          lang: 'es',
+          note: 'Estructura, frases fijas y vocabulario de la carta formal de queja, con un ejemplo completo.',
+        },
+        {
+          id: 'pwBS4HYWHxM',
+          title:
+            'Todas las FORMAS del REPORTED SPEECH explicación en español con EJERCICIOS |  Indirect Speech',
+          channel: 'Anoder Aprende Inglés',
+          lang: 'es',
+          note: 'Estilo indirecto con afirmaciones, preguntas y órdenes, el cambio de tiempos y ejercicios.',
+        },
+        {
+          id: 'X7nDkvYSbfs',
+          title: 'Complaining – 26 – English at Work tells you how to complain',
+          channel: 'BBC Learning English',
+          lang: 'en',
+          note: 'Un diálogo sobre cómo quejarse con educación, para practicar el listening.',
+        },
+      ],
       selfCheck: [
         [
           'Pasa a indirecto: "I will pay with traveller\'s cheques," he said.',
@@ -487,6 +536,31 @@ export const ap2: Subject = {
           ],
         },
       ],
+      videos: [
+        {
+          id: 'LmDOQbwwlhw',
+          title: 'How to Express Your Opinion in English',
+          channel: 'Learn English with Bob the Canadian',
+          lang: 'en',
+          note: 'Frases para dar tu opinión, como if you ask me, as far as I am concerned o to be honest.',
+        },
+        {
+          id: 'ezTizklj8Cg',
+          title:
+            'RELATIVE CLAUSES and pronouns - Defining and Non-defining - Explicación con ejemplos y ejercicio',
+          channel: 'Inglés Para Perezosos',
+          lang: 'es',
+          note: 'Los pronombres relativos y la diferencia entre defining y non-defining, con un ejercicio.',
+        },
+        {
+          id: 'V-Ro66uMBX4',
+          title:
+            '50 Differences Between 🇬🇧 British English Vs American English 🇺🇸 Vocabulary Words | Boost Word Power',
+          channel: "Learn English | Let's Talk - Free English Lessons",
+          lang: 'en',
+          note: 'Cincuenta diferencias de vocabulario entre inglés británico y americano.',
+        },
+      ],
       selfCheck: [
         [
           '¿Por qué no se puede usar that en "Alan Bennet, ___ we met at reception, is the manager"?',
@@ -650,6 +724,29 @@ export const ap2: Subject = {
             'Listening True / False / **Not Mentioned**: cuidado con confundir False (lo contradice) y Not Mentioned (no hay información).',
             'Vocabulario: aprende **significado + tipo de palabra + ejemplo** y sus familias (perform, performance, professional, professionally).',
           ],
+        },
+      ],
+      videos: [
+        {
+          id: 'oTPZWpQ9pbA',
+          title: 'Cultural differences and body language - 6 Minute English',
+          channel: 'BBC Learning English',
+          lang: 'en',
+          note: 'Diferencias culturales en el lenguaje corporal y los malentendidos que provocan.',
+        },
+        {
+          id: 'znGci0chZ7w',
+          title: 'How to Respond to Complaints the Right Way in English',
+          channel: 'Speak Confident English',
+          lang: 'en',
+          note: 'Cuatro pasos para atender una queja con empatía y sin ponerse a la defensiva.',
+        },
+        {
+          id: 'q41VacMmVnI',
+          title: 'How To Deal With Delayed Delivery Complaints - Business English Emails',
+          channel: 'Derek Callan - English for Professionals',
+          lang: 'en',
+          note: 'Cómo responder por escrito a una queja: frases de disculpa y estructura para la carta del examen.',
         },
       ],
       selfCheck: [
